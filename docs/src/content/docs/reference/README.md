@@ -7,7 +7,7 @@ sidebar:
 ---
 
 The following diagram illustrates the classes and their relationships for declarative agents.
-The root [object](AgentDefinition.md) represents the main entry point for the system.
+The root [object](/reference/AgentDefinition) represents the main entry point for the system.
 
 ```mermaid
 ---
