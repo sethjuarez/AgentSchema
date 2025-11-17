@@ -21,14 +21,16 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/microsoft/AgentSchema",
+          href: "https://github.com/sethjuarez/AgentSchema",
         },
       ],
       sidebar: [
         { label: "Home", link: "/" },
         {
           label: "Getting Started",
-          items: [{ label: "Guides", slug: "guides" }],
+          autogenerate: {
+            directory: "guides",
+          },
         },
         {
           label: "Reference",
