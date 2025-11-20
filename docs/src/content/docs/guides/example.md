@@ -31,12 +31,7 @@ name: customer-support
 displayName: "Customer Support Agent"
 description: "Handles customer inquiries and support requests"
 
-model:
-  id: "gpt-4o"
-  connection:
-    kind: ApiKeyConnection
-    endpoint: "https://api.openai.com/v1"
-    apiKey: "${OPENAI_API_KEY}"
+model: gpt-4o
 
 instructions: |
   You are a helpful customer support agent. Provide clear, 
@@ -184,5 +179,5 @@ instructions: "You are a sales assistant for Acme Corp"
 
 - Explore [AgentDefinition Reference](/reference/agentdefinition) for complete specification details
 - Review [AgentManifest Reference](/reference/agentmanifest) for template syntax
-- Check out the [Examples Repository](https://github.com/sethjuarez/AgentSchema/tree/main/examples) for real-world usage patterns
+- Check out the [Examples Repository](https://github.com/microsoft/AgentSchema/tree/main/examples) for real-world usage patterns
 - Learn about [PromptAgent](/reference/promptagent), [ContainerAgent](/reference/containeragent), and [Workflow](/reference/workflow) types
