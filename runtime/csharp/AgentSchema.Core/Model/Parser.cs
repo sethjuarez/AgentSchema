@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// Template parser definition
 /// </summary>
 [JsonConverter(typeof(ParserJsonConverter))]
-public class Parser : IYamlConvertible
+public class Parser
 {
     /// <summary>
     /// Initializes a new instance of <see cref="Parser"/>.
@@ -34,44 +30,4 @@ public class Parser : IYamlConvertible
     /// </summary>
     public IDictionary<string, object>? Options { get; set; }
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-        if (parser.TryConsume<Scalar>(out var scalar))
-        {
-            // check for non-numeric characters to differentiate strings from numbers
-            if (scalar.Value.Length > 0 && scalar.Value.Any(c => !char.IsDigit(c) && c != '.' && c != '-'))
-            {
-                var stringValue = scalar.Value;
-                Kind = stringValue;
-                return;
-            }
-            else
-            {
-                throw new YamlException($"Unexpected scalar value '' when parsing Parser. Expected one of the supported shorthand types or a mapping.");
-            }
-        }
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type Parser");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        if (Options != null)
-        {
-            emitter.Emit(new Scalar("options"));
-            nestedObjectSerializer(Options);
-        }
-
-    }
 }

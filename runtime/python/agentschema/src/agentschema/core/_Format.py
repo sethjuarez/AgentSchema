@@ -21,8 +21,8 @@ class Format:
     """
 
     kind: str = field(default="*")
-    strict: Optional[bool] = field(default=False)
-    options: Optional[dict[str, Any]] = field(default_factory=dict)
+    strict: Optional[bool] = None
+    options: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "Format":

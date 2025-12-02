@@ -11,7 +11,6 @@ public class WebSearchToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: bing_search
         connection:
@@ -25,13 +24,11 @@ public class WebSearchToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<WebSearchTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<WebSearchTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("bing_search", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for WebSearchTool, WiP");
     }
 
     [Fact]

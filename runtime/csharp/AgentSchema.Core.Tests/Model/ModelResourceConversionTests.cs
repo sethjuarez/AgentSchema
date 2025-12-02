@@ -11,21 +11,18 @@ public class ModelResourceConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: model
         id: gpt-4o
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ModelResource>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ModelResource>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("model", instance.Kind);
         Assert.Equal("gpt-4o", instance.Id);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ModelResource, WiP");
     }
 
     [Fact]

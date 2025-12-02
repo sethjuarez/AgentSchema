@@ -11,7 +11,6 @@ public class ConnectionConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: reference
         authenticationMode: system
@@ -19,15 +18,13 @@ public class ConnectionConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Connection>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Connection>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("reference", instance.Kind);
         Assert.Equal("system", instance.AuthenticationMode);
         Assert.Equal("This will allow the agent to respond to an email on your behalf", instance.UsageDescription);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Connection, WiP");
     }
 
     [Fact]

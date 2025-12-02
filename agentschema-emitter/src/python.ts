@@ -178,6 +178,8 @@ const renderType = (prop: PropertyNode): string => {
 const renderDefault = (prop: PropertyNode): string => {
   if (prop.isCollection) {
     return " = field(default_factory=list)";
+  } else if (prop.isOptional) {
+    return ` = None`;
   } else if (prop.isScalar) {
 
     if (prop.typeName.name === "boolean") {
@@ -195,8 +197,6 @@ const renderDefault = (prop: PropertyNode): string => {
     } else {
       return ` = field(default=${prop.defaultValue ?? "None"})`;
     }
-  } else if (prop.isOptional) {
-    return ` = field(default=${prop.defaultValue ?? "None"})`;
   } else {
     return ` = field(default_factory=${prop.typeName.name})`;
   }

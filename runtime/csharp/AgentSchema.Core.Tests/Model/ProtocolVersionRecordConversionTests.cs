@@ -11,21 +11,18 @@ public class ProtocolVersionRecordConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         protocol: responses
         version: v0.1.1
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ProtocolVersionRecord>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ProtocolVersionRecord>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("responses", instance.Protocol);
         Assert.Equal("v0.1.1", instance.Version);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ProtocolVersionRecord, WiP");
     }
 
     [Fact]

@@ -37,11 +37,11 @@ class AgentDefinition(ABC):
 
     kind: str = field(default="")
     name: str = field(default="")
-    displayName: Optional[str] = field(default="")
-    description: Optional[str] = field(default="")
-    metadata: Optional[dict[str, Any]] = field(default_factory=dict)
-    inputSchema: Optional[PropertySchema] = field(default=None)
-    outputSchema: Optional[PropertySchema] = field(default=None)
+    displayName: Optional[str] = None
+    description: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
+    inputSchema: Optional[PropertySchema] = None
+    outputSchema: Optional[PropertySchema] = None
 
     @staticmethod
     def load(data: Any) -> "AgentDefinition":
@@ -109,9 +109,9 @@ class PromptAgent(AgentDefinition):
     kind: str = field(default="prompt")
     model: Model = field(default_factory=Model)
     tools: Optional[list[Tool]] = field(default_factory=list)
-    template: Optional[Template] = field(default=None)
-    instructions: Optional[str] = field(default="")
-    additionalInstructions: Optional[str] = field(default="")
+    template: Optional[Template] = None
+    instructions: Optional[str] = None
+    additionalInstructions: Optional[str] = None
 
     @staticmethod
     def load(data: Any) -> "PromptAgent":
@@ -159,7 +159,7 @@ class Workflow(AgentDefinition):
     """
 
     kind: str = field(default="workflow")
-    trigger: Optional[dict[str, Any]] = field(default_factory=dict)
+    trigger: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "Workflow":

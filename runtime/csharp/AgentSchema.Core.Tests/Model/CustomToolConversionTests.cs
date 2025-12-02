@@ -11,7 +11,6 @@ public class CustomToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         connection:
           kind: reference
@@ -21,12 +20,10 @@ public class CustomToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<CustomTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<CustomTool>(yamlData);
 
         Assert.NotNull(instance);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for CustomTool, WiP");
     }
 
     [Fact]

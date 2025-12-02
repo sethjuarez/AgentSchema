@@ -11,21 +11,18 @@ public class ResourceConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         name: my-resource
         kind: model
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Resource>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Resource>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("my-resource", instance.Name);
         Assert.Equal("model", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Resource, WiP");
     }
 
     [Fact]

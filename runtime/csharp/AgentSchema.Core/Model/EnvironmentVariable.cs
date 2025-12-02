@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// Definition for an environment variable used in containerized agents.
 /// </summary>
 [JsonConverter(typeof(EnvironmentVariableJsonConverter))]
-public class EnvironmentVariable : IYamlConvertible
+public class EnvironmentVariable
 {
     /// <summary>
     /// Initializes a new instance of <see cref="EnvironmentVariable"/>.
@@ -34,26 +30,4 @@ public class EnvironmentVariable : IYamlConvertible
     /// </summary>
     public string Value { get; set; } = string.Empty;
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type EnvironmentVariable");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("name"));
-        nestedObjectSerializer(Name);
-
-        emitter.Emit(new Scalar("value"));
-        nestedObjectSerializer(Value);
-    }
 }

@@ -11,19 +11,16 @@ public class McpServerApprovalModeConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: never
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<McpServerApprovalMode>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpServerApprovalMode>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("never", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpServerApprovalMode, WiP");
     }
 
     [Fact]
@@ -54,13 +51,11 @@ public class McpServerApprovalModeConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"never\"";
-        var instance = YamlSerializer.Deserialize<McpServerApprovalMode>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpServerApprovalMode>(data);
         Assert.NotNull(instance);
         Assert.Equal("never", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpServerApprovalMode String shorthand , WiP");
     }
 
 }

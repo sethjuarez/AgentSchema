@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -15,7 +11,7 @@ namespace AgentSchema.Core;
 /// They are designed to be straightforward and easy to use for various applications.
 /// </summary>
 [JsonConverter(typeof(PromptAgentJsonConverter))]
-public class PromptAgent : AgentDefinition, IYamlConvertible
+public class PromptAgent : AgentDefinition
 {
     /// <summary>
     /// Initializes a new instance of <see cref="PromptAgent"/>.
@@ -56,54 +52,4 @@ public class PromptAgent : AgentDefinition, IYamlConvertible
     /// </summary>
     public string? AdditionalInstructions { get; set; }
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type PromptAgent");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("model"));
-        nestedObjectSerializer(Model);
-
-        if (Tools != null)
-        {
-            emitter.Emit(new Scalar("tools"));
-            nestedObjectSerializer(Tools);
-        }
-
-
-        if (Template != null)
-        {
-            emitter.Emit(new Scalar("template"));
-            nestedObjectSerializer(Template);
-        }
-
-
-        if (Instructions != null)
-        {
-            emitter.Emit(new Scalar("instructions"));
-            nestedObjectSerializer(Instructions);
-        }
-
-
-        if (AdditionalInstructions != null)
-        {
-            emitter.Emit(new Scalar("additionalInstructions"));
-            nestedObjectSerializer(AdditionalInstructions);
-        }
-
-    }
 }

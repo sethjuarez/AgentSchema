@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// 
 /// </summary>
 [JsonConverter(typeof(McpServerToolAlwaysRequireApprovalModeJsonConverter))]
-public class McpServerToolAlwaysRequireApprovalMode : McpServerApprovalMode, IYamlConvertible
+public class McpServerToolAlwaysRequireApprovalMode : McpServerApprovalMode
 {
     /// <summary>
     /// Initializes a new instance of <see cref="McpServerToolAlwaysRequireApprovalMode"/>.
@@ -29,23 +25,4 @@ public class McpServerToolAlwaysRequireApprovalMode : McpServerApprovalMode, IYa
     /// </summary>
     public override string Kind { get; set; } = "always";
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type McpServerToolAlwaysRequireApprovalMode");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-    }
 }

@@ -11,7 +11,6 @@ public class CodeInterpreterToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: code_interpreter
         fileIds:
@@ -20,13 +19,11 @@ public class CodeInterpreterToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<CodeInterpreterTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<CodeInterpreterTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("code_interpreter", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for CodeInterpreterTool, WiP");
     }
 
     [Fact]

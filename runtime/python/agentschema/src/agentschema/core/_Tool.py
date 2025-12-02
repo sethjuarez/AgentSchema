@@ -29,7 +29,7 @@ class Tool(ABC):
 
     name: str = field(default="")
     kind: str = field(default="")
-    description: Optional[str] = field(default="")
+    description: Optional[str] = None
     bindings: Optional[list[Binding]] = field(default_factory=list)
 
     @staticmethod
@@ -100,7 +100,7 @@ class FunctionTool(Tool):
 
     kind: str = field(default="function")
     parameters: PropertySchema = field(default_factory=PropertySchema)
-    strict: Optional[bool] = field(default=True)
+    strict: Optional[bool] = None
 
     @staticmethod
     def load(data: Any) -> "FunctionTool":
@@ -170,7 +170,7 @@ class WebSearchTool(Tool):
 
     kind: str = field(default="bing_search")
     connection: Connection = field(default_factory=Connection)
-    options: Optional[dict[str, Any]] = field(default_factory=dict)
+    options: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "WebSearchTool":
@@ -214,10 +214,10 @@ class FileSearchTool(Tool):
     kind: str = field(default="file_search")
     connection: Connection = field(default_factory=Connection)
     vectorStoreIds: list[str] = field(default_factory=list)
-    maximumResultCount: Optional[int] = field(default=0)
-    ranker: Optional[str] = field(default="")
-    scoreThreshold: Optional[float] = field(default=0.0)
-    filters: Optional[dict[str, Any]] = field(default_factory=dict)
+    maximumResultCount: Optional[int] = None
+    ranker: Optional[str] = None
+    scoreThreshold: Optional[float] = None
+    filters: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "FileSearchTool":
@@ -267,7 +267,7 @@ class McpTool(Tool):
     kind: str = field(default="mcp")
     connection: Connection = field(default_factory=Connection)
     serverName: str = field(default="")
-    serverDescription: Optional[str] = field(default="")
+    serverDescription: Optional[str] = None
     approvalMode: McpServerApprovalMode = field(default_factory=McpServerApprovalMode)
     allowedTools: Optional[list[str]] = field(default_factory=list)
 

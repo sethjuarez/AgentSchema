@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// Connection configuration for AI services using API keys.
 /// </summary>
 [JsonConverter(typeof(ApiKeyConnectionJsonConverter))]
-public class ApiKeyConnection : Connection, IYamlConvertible
+public class ApiKeyConnection : Connection
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ApiKeyConnection"/>.
@@ -39,29 +35,4 @@ public class ApiKeyConnection : Connection, IYamlConvertible
     /// </summary>
     public string ApiKey { get; set; } = string.Empty;
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type ApiKeyConnection");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("endpoint"));
-        nestedObjectSerializer(Endpoint);
-
-        emitter.Emit(new Scalar("apiKey"));
-        nestedObjectSerializer(ApiKey);
-    }
 }

@@ -11,7 +11,6 @@ public class RemoteConnectionConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: remote
         name: my-reference-connection
@@ -19,15 +18,13 @@ public class RemoteConnectionConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<RemoteConnection>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<RemoteConnection>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("remote", instance.Kind);
         Assert.Equal("my-reference-connection", instance.Name);
         Assert.Equal("https://{your-custom-endpoint}.openai.azure.com/", instance.Endpoint);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for RemoteConnection, WiP");
     }
 
     [Fact]

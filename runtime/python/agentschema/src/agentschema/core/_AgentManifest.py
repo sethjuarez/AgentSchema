@@ -33,8 +33,8 @@ class AgentManifest:
 
     name: str = field(default="")
     displayName: str = field(default="")
-    description: Optional[str] = field(default="")
-    metadata: Optional[dict[str, Any]] = field(default_factory=dict)
+    description: Optional[str] = None
+    metadata: Optional[dict[str, Any]] = None
     template: AgentDefinition = field(default_factory=AgentDefinition)
     parameters: PropertySchema = field(default_factory=PropertySchema)
     resources: list[Resource] = field(default_factory=list)

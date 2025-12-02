@@ -54,6 +54,7 @@ export const generateCsharp = async (context: EmitContext<AgentSchemaEmitterOpti
   });
   const classTemplate = env.getTemplate('dataclass.njk', true);
   const jsonTemplate = env.getTemplate('json.njk', true);
+  const yamlTemplate = env.getTemplate('yaml.njk', true);
   const utilsTemplate = env.getTemplate('utils.njk', true);
   const deserializerTemplate = env.getTemplate('deserializer.njk', true);
   const testTemplate = env.getTemplate('test.njk', true);
@@ -66,9 +67,10 @@ export const generateCsharp = async (context: EmitContext<AgentSchemaEmitterOpti
 
   const deserializer = deserializerTemplate.render({
     namespace: node.typeName.namespace,
+    types: nodes,
   });
 
-  await emitCsharpFile(context, node, deserializer, "YamlSerializer.cs", emitTarget["output-dir"]);
+  await emitCsharpFile(context, node, deserializer, "YamlConverter.cs", emitTarget["output-dir"]);
 
   await emitCsharpFile(context, node, utils, "Utils.cs", emitTarget["output-dir"]);
 
@@ -79,12 +81,41 @@ export const generateCsharp = async (context: EmitContext<AgentSchemaEmitterOpti
     //const className = getClassName(node.typeName.name);
     await emitCsharpFile(context, node, renderCSharp(nodes, node, classTemplate), `${node.typeName.name}.cs`, emitTarget["output-dir"]);
     await emitCsharpFile(context, node, renderJsonConverter(nodes, node, jsonTemplate), `${node.typeName.name}JsonConverter.cs`, emitTarget["output-dir"]);
+    await emitCsharpFile(context, node, renderYamlConverter(nodes, node, yamlTemplate), `${node.typeName.name}YamlConverter.cs`, emitTarget["output-dir"]);
     if (emitTarget["test-dir"]) {
       await emitCsharpFile(context, node, renderTests(node, testTemplate), `${node.typeName.name}ConversionTests.cs`, emitTarget["test-dir"]);
     }
   }
 };
 
+
+const renderYamlConverter = (nodes: TypeNode[], node: TypeNode, yamlTemplate: nunjucks.Template): string => {
+  const polymorphicTypes = node.retrievePolymorphicTypes();
+  const findType = (typeName: string): TypeNode | undefined => {
+    return nodes.find(n => n.typeName.name === typeName);
+  }
+  const alternates = generateAlternates(node).filter(alt => alt.scalar !== "float" && alt.scalar !== "int");
+  const numericAlternates = generateAlternates(node).filter(alt => alt.scalar === "float" || alt.scalar === "int");
+
+  const csharp = yamlTemplate.render({
+    node: node,
+    renderPropertyName: renderPropertyName,
+    renderName: renderName,
+    renderType: renderType,
+    renderDefault: renderDefault,
+    renderSetInstance: renderSetInstance,
+    renderSummary: renderSummary,
+    renderPropertyModifier: renderPropertyModifier(findType, node),
+    renderNullCoalescing: renderNullCoalescing,
+    converterMapper: (s: string) => jsonConverterMapper[s] || `Get${s.charAt(0).toUpperCase() + s.slice(1)}`,
+    polymorphicTypes: polymorphicTypes,
+    collectionTypes: node.properties.filter(p => p.isCollection && !p.isScalar),
+    alternates: alternates,
+    numericAlternates: numericAlternates,
+  });
+
+  return csharp;
+};
 
 const renderJsonConverter = (nodes: TypeNode[], node: TypeNode, jsonTemplate: nunjucks.Template): string => {
   const polymorphicTypes = node.retrievePolymorphicTypes();
@@ -278,8 +309,8 @@ const isNonNullableValueType = (typeName: string): boolean => {
   return ["int", "float", "double", "bool"].includes(typeName);
 };
 
-const renderType = (prop: PropertyNode): string => {
-  return `${renderSimpleType(prop)}${prop.isOptional ? "?" : ""}`;
+const renderType = (prop: PropertyNode, removeOptional: boolean = false): string => {
+  return `${renderSimpleType(prop)}${prop.isOptional && !removeOptional ? "?" : ""}`;
 };
 
 const renderSimpleType = (prop: PropertyNode): string => {

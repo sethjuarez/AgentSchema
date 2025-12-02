@@ -22,7 +22,7 @@ class PropertySchema:
     """
 
     examples: Optional[list[dict[str, Any]]] = field(default_factory=list)
-    strict: Optional[bool] = field(default=False)
+    strict: Optional[bool] = None
     properties: list[Property] = field(default_factory=list)
 
     @staticmethod

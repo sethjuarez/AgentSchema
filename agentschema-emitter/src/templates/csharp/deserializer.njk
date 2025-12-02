@@ -1,3 +1,4 @@
+using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
 #pragma warning disable IDE0130
@@ -5,43 +6,78 @@ namespace {{ namespace }};
 #pragma warning restore IDE0130
 
 /// <summary>
-/// Helper class for serializing and deserializing YAML data
+/// Base class for YAML converters.
 /// </summary>
-public class YamlSerializer
+/// <typeparam name="T">The type this converter handles.</typeparam>
+public abstract class YamlConverter<T> : IYamlTypeConverter
 {
-    private static IDeserializer? _deserializer;
-    private static ISerializer? _serializer;
-
     /// <summary>
-    /// Deserialize YAML string into an object of type T
+    /// Determines if this converter can handle the specified type.
     /// </summary>
-    /// <typeparam name="T">The type of the object to deserialize</typeparam>
-    /// <param name="yaml">The YAML string to deserialize</param>
-    /// <returns>The deserialized object</returns>
-    public static T Deserialize<T>(object yaml)
+    /// <param name="type">The type to check.</param>
+    /// <returns>True if the converter can handle the type; otherwise, false.</returns>
+    public bool Accepts(Type type)
     {
-        _deserializer ??= new DeserializerBuilder()
-            .Build();
-
-        if (yaml is string s)
-        {
-            return _deserializer.Deserialize<T>(s);
-        }
-
-        return _deserializer.Deserialize<T>(yaml.ToString() ?? string.Empty);
+        return typeof(T).IsAssignableFrom(type);
     }
 
     /// <summary>
-    /// Serialize an object of type T into a YAML string
+    /// Reads an object of type T from YAML.
     /// </summary>
-    /// <typeparam name="T">The type of the object to serialize</typeparam>
-    /// <param name="obj">The object to serialize</param>
-    /// <returns>The serialized YAML string</returns>
-    public static string Serialize<T>(T obj)
+    /// <param name="parser">The YAML parser.</param>
+    /// <param name="type">The type to deserialize.</param>
+    /// <param name="rootDeserializer">The root deserializer delegate.</param>
+    /// <returns>The deserialized object.</returns>
+    public object? ReadYaml(IParser parser, Type type, ObjectDeserializer rootDeserializer)
     {
-        _serializer ??= new SerializerBuilder()
-            .Build();
+        return Read(parser, rootDeserializer);
+    }
 
-        return _serializer.Serialize(obj);
+    /// <summary>
+    /// Writes an object of type T to YAML.
+    /// </summary>
+    /// <param name="emitter">The YAML emitter.</param>
+    /// <param name="value">The object to serialize.</param>
+    /// <param name="type">The type of the object.</param>
+    /// <param name="serializer">The serializer delegate.</param>
+    public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
+    {
+        Write(emitter, (T)value!, serializer);
+    }
+
+    /// <summary>
+    /// Reads an object of type T from the YAML parser.
+    /// </summary>
+    /// <param name="parser">The YAML parser.</param>
+    /// <param name="rootDeserializer">The root deserializer delegate.</param>
+    /// <returns>The deserialized object.</returns>
+    public abstract T Read(IParser parser, ObjectDeserializer rootDeserializer);
+
+
+    /// <summary>
+    /// Writes an object of type T to the YAML emitter.
+    /// </summary>
+    /// <param name="emitter">The YAML emitter.</param>
+    /// <param name="value">The object to serialize.</param>
+    /// <param name="serializer">The serializer delegate.</param>
+    public abstract void Write(IEmitter emitter, T value, ObjectSerializer serializer);
+}
+
+
+public class Yaml
+{
+    private static readonly IDeserializer deserializer = new DeserializerBuilder()
+        {%- for type in types %}
+        .WithTypeConverter({{ type.typeName.name }}YamlConverter.Instance)
+        {%- endfor %}
+        .Build();
+
+    /// <summary>
+    /// Gets the YAML deserializer configured with custom converters.
+    /// </summary>
+    /// <returns>The YAML deserializer.</returns>
+    public static IDeserializer GetDeserializer()
+    {
+        return deserializer;
     }
 }

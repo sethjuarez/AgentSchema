@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -14,7 +10,7 @@ namespace AgentSchema.Core;
 /// This includes the properties and example records.
 /// </summary>
 [JsonConverter(typeof(PropertySchemaJsonConverter))]
-public class PropertySchema : IYamlConvertible
+public class PropertySchema
 {
     /// <summary>
     /// Initializes a new instance of <see cref="PropertySchema"/>.
@@ -40,37 +36,4 @@ public class PropertySchema : IYamlConvertible
     /// </summary>
     public IList<Property> Properties { get; set; } = [];
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type PropertySchema");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        if (Examples != null)
-        {
-            emitter.Emit(new Scalar("examples"));
-            nestedObjectSerializer(Examples);
-        }
-
-
-        if (Strict != null)
-        {
-            emitter.Emit(new Scalar("strict"));
-            nestedObjectSerializer(Strict);
-        }
-
-
-        emitter.Emit(new Scalar("properties"));
-        nestedObjectSerializer(Properties);
-    }
 }

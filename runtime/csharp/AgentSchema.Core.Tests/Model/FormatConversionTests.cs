@@ -11,7 +11,6 @@ public class FormatConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: mustache
         strict: true
@@ -20,14 +19,12 @@ public class FormatConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Format>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Format>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("mustache", instance.Kind);
         Assert.True(instance.Strict);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Format, WiP");
     }
 
     [Fact]
@@ -63,13 +60,11 @@ public class FormatConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"example\"";
-        var instance = YamlSerializer.Deserialize<Format>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Format>(data);
         Assert.NotNull(instance);
         Assert.Equal("example", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Format String shorthand , WiP");
     }
 
 }

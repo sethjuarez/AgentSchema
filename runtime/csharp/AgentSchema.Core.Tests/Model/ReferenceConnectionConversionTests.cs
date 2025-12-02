@@ -11,7 +11,6 @@ public class ReferenceConnectionConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: reference
         name: my-reference-connection
@@ -19,15 +18,13 @@ public class ReferenceConnectionConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ReferenceConnection>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ReferenceConnection>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("reference", instance.Kind);
         Assert.Equal("my-reference-connection", instance.Name);
         Assert.Equal("my-target-resource", instance.Target);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ReferenceConnection, WiP");
     }
 
     [Fact]

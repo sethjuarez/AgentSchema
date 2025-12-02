@@ -11,7 +11,6 @@ public class PromptAgentConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: prompt
         model:
@@ -49,8 +48,8 @@ public class PromptAgentConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<PromptAgent>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<PromptAgent>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("prompt", instance.Kind);
@@ -65,8 +64,6 @@ You are helping {{firstName}} {{lastName}} to find answers to
 their questions. Use their name to address them in your responses.
 user:
 {{question}}", instance.Instructions);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for PromptAgent, WiP");
     }
 
     [Fact]
@@ -126,7 +123,6 @@ user:
     [Fact]
     public void LoadYamlInput1()
     {
-        /*
         string yamlData = """
         kind: prompt
         model:
@@ -164,8 +160,8 @@ user:
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<PromptAgent>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<PromptAgent>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("prompt", instance.Kind);
@@ -180,8 +176,6 @@ You are helping {{firstName}} {{lastName}} to find answers to
 their questions. Use their name to address them in your responses.
 user:
 {{question}}", instance.Instructions);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for PromptAgent, WiP");
     }
 
     [Fact]

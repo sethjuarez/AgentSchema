@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -15,7 +11,7 @@ namespace AgentSchema.Core;
 /// in a hosted environment that the provider manages.
 /// </summary>
 [JsonConverter(typeof(ContainerAgentJsonConverter))]
-public class ContainerAgent : AgentDefinition, IYamlConvertible
+public class ContainerAgent : AgentDefinition
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ContainerAgent"/>.
@@ -41,33 +37,4 @@ public class ContainerAgent : AgentDefinition, IYamlConvertible
     /// </summary>
     public IList<EnvironmentVariable>? EnvironmentVariables { get; set; }
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type ContainerAgent");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("protocols"));
-        nestedObjectSerializer(Protocols);
-
-        if (EnvironmentVariables != null)
-        {
-            emitter.Emit(new Scalar("environmentVariables"));
-            nestedObjectSerializer(EnvironmentVariables);
-        }
-
-    }
 }

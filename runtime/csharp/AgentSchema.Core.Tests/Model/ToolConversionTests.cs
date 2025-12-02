@@ -11,7 +11,6 @@ public class ToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         name: my-tool
         kind: function
@@ -21,15 +20,13 @@ public class ToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Tool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Tool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("my-tool", instance.Name);
         Assert.Equal("function", instance.Kind);
         Assert.Equal("A description of the tool", instance.Description);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Tool, WiP");
     }
 
     [Fact]

@@ -11,7 +11,6 @@ public class FileSearchToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: file_search
         connection:
@@ -28,16 +27,14 @@ public class FileSearchToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<FileSearchTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<FileSearchTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("file_search", instance.Kind);
         Assert.Equal(10, instance.MaximumResultCount);
         Assert.Equal("auto", instance.Ranker);
         Assert.Equal(0.5f, instance.ScoreThreshold);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for FileSearchTool, WiP");
     }
 
     [Fact]

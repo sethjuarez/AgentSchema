@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// 
 /// </summary>
 [JsonConverter(typeof(ProtocolVersionRecordJsonConverter))]
-public class ProtocolVersionRecord : IYamlConvertible
+public class ProtocolVersionRecord
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ProtocolVersionRecord"/>.
@@ -34,26 +30,4 @@ public class ProtocolVersionRecord : IYamlConvertible
     /// </summary>
     public string Version { get; set; } = string.Empty;
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type ProtocolVersionRecord");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("protocol"));
-        nestedObjectSerializer(Protocol);
-
-        emitter.Emit(new Scalar("version"));
-        nestedObjectSerializer(Version);
-    }
 }

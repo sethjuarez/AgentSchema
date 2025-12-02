@@ -11,7 +11,6 @@ public class PropertyConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         name: my-input
         kind: string
@@ -26,8 +25,8 @@ public class PropertyConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Property>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Property>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("my-input", instance.Name);
@@ -36,8 +35,6 @@ public class PropertyConversionTests
         Assert.True(instance.Required);
         Assert.Equal("default value", instance.Default);
         Assert.Equal("example value", instance.Example);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Property, WiP");
     }
 
     [Fact]
@@ -86,16 +83,14 @@ public class PropertyConversionTests
     public void LoadYamlFromBoolean()
     {
         // alternate representation as boolean
-        /*
         var data = false;
-        var instance = YamlSerializer.Deserialize<Property>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Property>(data.ToString());
         Assert.NotNull(instance);
         Assert.Equal("boolean", instance.Kind);
         Assert.NotNull(instance.Example);
         Assert.IsType<bool>(instance.Example);
         Assert.False((bool)instance.Example);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Property Boolean shorthand , WiP");
     }
     [Fact]
     public void LoadJsonFromFloat32()
@@ -114,15 +109,13 @@ public class PropertyConversionTests
     public void LoadYamlFromFloat32()
     {
         // alternate representation as float32
-        /*
         var data = 3.14;
-        var instance = YamlSerializer.Deserialize<Property>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Property>(data.ToString());
         Assert.NotNull(instance);
         Assert.Equal("float", instance.Kind);
         Assert.IsType<float>(instance.Example);
         Assert.Equal(3.14, (float)instance.Example, precision: 5);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Property Float32 shorthand , WiP");
     }
     [Fact]
     public void LoadJsonFromInteger()
@@ -140,14 +133,12 @@ public class PropertyConversionTests
     public void LoadYamlFromInteger()
     {
         // alternate representation as integer
-        /*
         var data = 4;
-        var instance = YamlSerializer.Deserialize<Property>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Property>(data.ToString());
         Assert.NotNull(instance);
         Assert.Equal("integer", instance.Kind);
         Assert.Equal(4, instance.Example);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Property Integer shorthand , WiP");
     }
     [Fact]
     public void LoadJsonFromString()
@@ -165,14 +156,12 @@ public class PropertyConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"example\"";
-        var instance = YamlSerializer.Deserialize<Property>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Property>(data);
         Assert.NotNull(instance);
         Assert.Equal("string", instance.Kind);
         Assert.Equal("example", instance.Example);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Property String shorthand , WiP");
     }
 
 }

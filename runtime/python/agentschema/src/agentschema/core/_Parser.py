@@ -19,7 +19,7 @@ class Parser:
     """
 
     kind: str = field(default="*")
-    options: Optional[dict[str, Any]] = field(default_factory=dict)
+    options: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "Parser":
