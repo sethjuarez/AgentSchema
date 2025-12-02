@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -14,7 +10,7 @@ namespace AgentSchema.Core;
 /// This tool allows an AI agent to run code snippets and analyze data files.
 /// </summary>
 [JsonConverter(typeof(CodeInterpreterToolJsonConverter))]
-public class CodeInterpreterTool : Tool, IYamlConvertible
+public class CodeInterpreterTool : Tool
 {
     /// <summary>
     /// Initializes a new instance of <see cref="CodeInterpreterTool"/>.
@@ -35,26 +31,4 @@ public class CodeInterpreterTool : Tool, IYamlConvertible
     /// </summary>
     public IList<string> FileIds { get; set; } = [];
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type CodeInterpreterTool");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("fileIds"));
-        nestedObjectSerializer(FileIds);
-    }
 }

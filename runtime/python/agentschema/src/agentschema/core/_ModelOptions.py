@@ -34,16 +34,16 @@ class ModelOptions:
         Additional custom properties for model options
     """
 
-    frequencyPenalty: Optional[float] = field(default=0.0)
-    maxOutputTokens: Optional[int] = field(default=0)
-    presencePenalty: Optional[float] = field(default=0.0)
-    seed: Optional[int] = field(default=0)
-    temperature: Optional[float] = field(default=0.0)
-    topK: Optional[int] = field(default=0)
-    topP: Optional[float] = field(default=0.0)
+    frequencyPenalty: Optional[float] = None
+    maxOutputTokens: Optional[int] = None
+    presencePenalty: Optional[float] = None
+    seed: Optional[int] = None
+    temperature: Optional[float] = None
+    topK: Optional[int] = None
+    topP: Optional[float] = None
     stopSequences: Optional[list[str]] = field(default_factory=list)
-    allowMultipleToolCalls: Optional[bool] = field(default=False)
-    additionalProperties: Optional[dict[str, Any]] = field(default_factory=dict)
+    allowMultipleToolCalls: Optional[bool] = None
+    additionalProperties: Optional[dict[str, Any]] = None
 
     @staticmethod
     def load(data: Any) -> "ModelOptions":

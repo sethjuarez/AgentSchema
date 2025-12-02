@@ -11,7 +11,6 @@ public class ModelConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         id: gpt-35-turbo
         provider: azure
@@ -27,15 +26,13 @@ public class ModelConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Model>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Model>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("gpt-35-turbo", instance.Id);
         Assert.Equal("azure", instance.Provider);
         Assert.Equal("chat", instance.ApiType);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Model, WiP");
     }
 
     [Fact]
@@ -80,13 +77,11 @@ public class ModelConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"example\"";
-        var instance = YamlSerializer.Deserialize<Model>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Model>(data);
         Assert.NotNull(instance);
         Assert.Equal("example", instance.Id);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Model String shorthand , WiP");
     }
 
 }

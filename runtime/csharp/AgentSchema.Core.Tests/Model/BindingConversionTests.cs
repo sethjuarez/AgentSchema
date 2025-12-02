@@ -11,21 +11,18 @@ public class BindingConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         name: my-tool
         input: input-variable
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Binding>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Binding>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("my-tool", instance.Name);
         Assert.Equal("input-variable", instance.Input);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Binding, WiP");
     }
 
     [Fact]
@@ -58,13 +55,11 @@ public class BindingConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"example\"";
-        var instance = YamlSerializer.Deserialize<Binding>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Binding>(data);
         Assert.NotNull(instance);
         Assert.Equal("example", instance.Input);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Binding String shorthand , WiP");
     }
 
 }

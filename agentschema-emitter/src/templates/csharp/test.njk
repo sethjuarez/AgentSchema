@@ -11,15 +11,14 @@ public class {{ node.typeName.name }}ConversionTests
     [Fact]
     public void LoadYamlInput{% if not loop.first %}{{loop.index - 1}}{% endif %}()
     {
-        /*
         string yamlData = """
         {%- for line in sample.yaml %}
         {{ line | safe }}
         {%- endfor %}
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<{{ node.typeName.name }}>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<{{ node.typeName.name }}>(yamlData);
 
         Assert.NotNull(instance);
         
@@ -30,8 +29,6 @@ public class {{ node.typeName.name }}ConversionTests
         Assert.Equal({{ validation.startDelim | safe }}{{ validation.value | safe }}{{ validation.endDelim | safe }}, instance.{{ validation.key }});
         {%- endif %}
         {%- endfor %}
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for {{ node.typeName.name }}, WiP");
     }
 
     [Fact]
@@ -87,13 +84,13 @@ public class {{ node.typeName.name }}ConversionTests
     public void LoadYamlFrom{{ alt.scalar | title }}()
     {
         // alternate representation as {{ alt.scalar }}
-        /*
         {%- if alt.scalar == "string" %}
         var data = "{{ alt.value | replace('"', '\\"') | safe }}";
         {%- else %}
         var data = {% if alt.value == "True" %}true{% elif alt.value == "False" %}false{% else %}{{ alt.value | safe }}{% endif %};
         {%- endif %}
-        var instance = YamlSerializer.Deserialize<{{ node.typeName.name }}>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<{{ node.typeName.name }}>(data{% if alt.scalar != "string" %}.ToString(){% endif %});
         Assert.NotNull(instance);
         
         {%- for item in alt.validation %}
@@ -108,8 +105,6 @@ public class {{ node.typeName.name }}ConversionTests
         Assert.Equal({{ item.delimeter | safe }}{{ item.value | safe }}{{ item.delimeter | safe }}, instance.{{ item.key }});   
         {%- endif %}
         {%- endfor %}
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for {{ node.typeName.name }} {{ alt.scalar | title }} shorthand , WiP");
     }
     {% endfor %}
     {%- endif %}

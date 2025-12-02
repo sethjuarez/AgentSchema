@@ -27,10 +27,10 @@ class Model:
     """
 
     id: str = field(default="")
-    provider: Optional[str] = field(default="")
-    apiType: Optional[str] = field(default="")
-    connection: Optional[Connection] = field(default=None)
-    options: Optional[ModelOptions] = field(default=None)
+    provider: Optional[str] = None
+    apiType: Optional[str] = None
+    connection: Optional[Connection] = None
+    options: Optional[ModelOptions] = None
 
     @staticmethod
     def load(data: Any) -> "Model":

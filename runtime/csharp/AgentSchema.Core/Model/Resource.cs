@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -15,7 +11,7 @@ namespace AgentSchema.Core;
 /// that the agent needs to interact with to perform its tasks
 /// </summary>
 [JsonConverter(typeof(ResourceJsonConverter))]
-public abstract class Resource : IYamlConvertible
+public abstract class Resource
 {
     /// <summary>
     /// Initializes a new instance of <see cref="Resource"/>.
@@ -36,51 +32,4 @@ public abstract class Resource : IYamlConvertible
     /// </summary>
     public virtual string Kind { get; set; } = string.Empty;
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type Resource");
-        }
-
-        // handle polymorphic types
-        if (node.Children.TryGetValue(new YamlScalarNode("kind"), out var discriminatorNode))
-        {
-            var discriminatorValue = (discriminatorNode as YamlScalarNode)?.Value;
-            switch (discriminatorValue)
-            {
-                case "model":
-                    var modelResource = nestedObjectDeserializer(typeof(ModelResource)) as ModelResource;
-                    if (modelResource == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type ModelResource");
-                    }
-                    return;
-                case "tool":
-                    var toolResource = nestedObjectDeserializer(typeof(ToolResource)) as ToolResource;
-                    if (toolResource == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type ToolResource");
-                    }
-                    return;
-                default:
-                    throw new YamlException($"Unknown type discriminator '' when parsing Resource");
-
-            }
-        }
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("name"));
-        nestedObjectSerializer(Name);
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-    }
 }

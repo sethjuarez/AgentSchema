@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -20,7 +16,7 @@ namespace AgentSchema.Core;
 /// and processed to generate prompts for AI models.
 /// </summary>
 [JsonConverter(typeof(TemplateJsonConverter))]
-public class Template : IYamlConvertible
+public class Template
 {
     /// <summary>
     /// Initializes a new instance of <see cref="Template"/>.
@@ -41,26 +37,4 @@ public class Template : IYamlConvertible
     /// </summary>
     public Parser Parser { get; set; }
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type Template");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("format"));
-        nestedObjectSerializer(Format);
-
-        emitter.Emit(new Scalar("parser"));
-        nestedObjectSerializer(Parser);
-    }
 }

@@ -11,7 +11,6 @@ public class AgentManifestConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         name: basic-prompt
         displayName: My Basic Prompt
@@ -48,15 +47,13 @@ public class AgentManifestConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<AgentManifest>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<AgentManifest>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("basic-prompt", instance.Name);
         Assert.Equal("My Basic Prompt", instance.DisplayName);
         Assert.Equal("A basic prompt that uses the GPT-3 chat API to answer questions", instance.Description);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for AgentManifest, WiP");
     }
 
     [Fact]
@@ -122,7 +119,6 @@ public class AgentManifestConversionTests
     [Fact]
     public void LoadYamlInput1()
     {
-        /*
         string yamlData = """
         name: basic-prompt
         displayName: My Basic Prompt
@@ -159,15 +155,13 @@ public class AgentManifestConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<AgentManifest>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<AgentManifest>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("basic-prompt", instance.Name);
         Assert.Equal("My Basic Prompt", instance.DisplayName);
         Assert.Equal("A basic prompt that uses the GPT-3 chat API to answer questions", instance.Description);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for AgentManifest, WiP");
     }
 
     [Fact]

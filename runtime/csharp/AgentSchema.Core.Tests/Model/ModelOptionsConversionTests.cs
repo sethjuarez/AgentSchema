@@ -11,7 +11,6 @@ public class ModelOptionsConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         frequencyPenalty: 0.5
         maxOutputTokens: 2048
@@ -31,8 +30,8 @@ public class ModelOptionsConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ModelOptions>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ModelOptions>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal(0.5f, instance.FrequencyPenalty);
@@ -43,8 +42,6 @@ public class ModelOptionsConversionTests
         Assert.Equal(40, instance.TopK);
         Assert.Equal(0.9f, instance.TopP);
         Assert.True(instance.AllowMultipleToolCalls);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ModelOptions, WiP");
     }
 
     [Fact]

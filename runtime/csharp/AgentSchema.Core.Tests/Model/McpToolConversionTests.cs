@@ -11,7 +11,6 @@ public class McpToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: mcp
         connection:
@@ -26,15 +25,13 @@ public class McpToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<McpTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("mcp", instance.Kind);
         Assert.Equal("My MCP Server", instance.ServerName);
         Assert.Equal("This tool allows access to MCP services.", instance.ServerDescription);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpTool, WiP");
     }
 
     [Fact]

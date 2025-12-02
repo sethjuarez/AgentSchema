@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -17,7 +13,7 @@ namespace AgentSchema.Core;
 /// Server tools can be used to offload heavy processing from client applications
 /// </summary>
 [JsonConverter(typeof(CustomToolJsonConverter))]
-public class CustomTool : Tool, IYamlConvertible
+public class CustomTool : Tool
 {
     /// <summary>
     /// Initializes a new instance of <see cref="CustomTool"/>.
@@ -43,29 +39,4 @@ public class CustomTool : Tool, IYamlConvertible
     /// </summary>
     public IDictionary<string, object> Options { get; set; } = new Dictionary<string, object>();
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type CustomTool");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("connection"));
-        nestedObjectSerializer(Connection);
-
-        emitter.Emit(new Scalar("options"));
-        nestedObjectSerializer(Options);
-    }
 }

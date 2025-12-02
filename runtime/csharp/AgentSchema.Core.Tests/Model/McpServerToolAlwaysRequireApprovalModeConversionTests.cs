@@ -11,19 +11,16 @@ public class McpServerToolAlwaysRequireApprovalModeConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: always
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<McpServerToolAlwaysRequireApprovalMode>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpServerToolAlwaysRequireApprovalMode>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("always", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpServerToolAlwaysRequireApprovalMode, WiP");
     }
 
     [Fact]

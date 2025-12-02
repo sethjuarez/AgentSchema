@@ -11,7 +11,6 @@ public class ParserConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: prompty
         options:
@@ -19,13 +18,11 @@ public class ParserConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Parser>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Parser>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("prompty", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Parser, WiP");
     }
 
     [Fact]
@@ -59,13 +56,11 @@ public class ParserConversionTests
     public void LoadYamlFromString()
     {
         // alternate representation as string
-        /*
         var data = "\"example\"";
-        var instance = YamlSerializer.Deserialize<Parser>(data);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Parser>(data);
         Assert.NotNull(instance);
         Assert.Equal("example", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Parser String shorthand , WiP");
     }
 
 }

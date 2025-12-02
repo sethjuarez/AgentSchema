@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// 
 /// </summary>
 [JsonConverter(typeof(AnonymousConnectionJsonConverter))]
-public class AnonymousConnection : Connection, IYamlConvertible
+public class AnonymousConnection : Connection
 {
     /// <summary>
     /// Initializes a new instance of <see cref="AnonymousConnection"/>.
@@ -34,26 +30,4 @@ public class AnonymousConnection : Connection, IYamlConvertible
     /// </summary>
     public string Endpoint { get; set; } = string.Empty;
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type AnonymousConnection");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("endpoint"));
-        nestedObjectSerializer(Endpoint);
-    }
 }

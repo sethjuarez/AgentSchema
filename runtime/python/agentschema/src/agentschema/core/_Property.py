@@ -30,10 +30,10 @@ class Property:
 
     name: str = field(default="")
     kind: str = field(default="")
-    description: Optional[str] = field(default="")
-    required: Optional[bool] = field(default=False)
-    default: Optional[Any] = field(default=None)
-    example: Optional[Any] = field(default=None)
+    description: Optional[str] = None
+    required: Optional[bool] = None
+    default: Optional[Any] = None
+    example: Optional[Any] = None
     enumValues: Optional[list[Any]] = field(default_factory=list)
 
     @staticmethod

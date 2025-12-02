@@ -11,7 +11,6 @@ public class ContainerAgentConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: hosted
         protocols:
@@ -23,13 +22,11 @@ public class ContainerAgentConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ContainerAgent>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ContainerAgent>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("hosted", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ContainerAgent, WiP");
     }
 
     [Fact]

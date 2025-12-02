@@ -11,7 +11,6 @@ public class FunctionToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: function
         parameters:
@@ -29,14 +28,12 @@ public class FunctionToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<FunctionTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<FunctionTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("function", instance.Kind);
         Assert.True(instance.Strict);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for FunctionTool, WiP");
     }
 
     [Fact]
@@ -73,7 +70,6 @@ public class FunctionToolConversionTests
     [Fact]
     public void LoadYamlInput1()
     {
-        /*
         string yamlData = """
         kind: function
         parameters:
@@ -91,14 +87,12 @@ public class FunctionToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<FunctionTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<FunctionTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("function", instance.Kind);
         Assert.True(instance.Strict);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for FunctionTool, WiP");
     }
 
     [Fact]

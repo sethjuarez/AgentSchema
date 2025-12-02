@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// The MCP Server tool.
 /// </summary>
 [JsonConverter(typeof(McpToolJsonConverter))]
-public class McpTool : Tool, IYamlConvertible
+public class McpTool : Tool
 {
     /// <summary>
     /// Initializes a new instance of <see cref="McpTool"/>.
@@ -54,46 +50,4 @@ public class McpTool : Tool, IYamlConvertible
     /// </summary>
     public IList<string>? AllowedTools { get; set; }
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type McpTool");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("connection"));
-        nestedObjectSerializer(Connection);
-
-        emitter.Emit(new Scalar("serverName"));
-        nestedObjectSerializer(ServerName);
-
-        if (ServerDescription != null)
-        {
-            emitter.Emit(new Scalar("serverDescription"));
-            nestedObjectSerializer(ServerDescription);
-        }
-
-
-        emitter.Emit(new Scalar("approvalMode"));
-        nestedObjectSerializer(ApprovalMode);
-
-        if (AllowedTools != null)
-        {
-            emitter.Emit(new Scalar("allowedTools"));
-            nestedObjectSerializer(AllowedTools);
-        }
-
-    }
 }

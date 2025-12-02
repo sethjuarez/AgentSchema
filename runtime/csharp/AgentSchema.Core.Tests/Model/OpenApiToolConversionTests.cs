@@ -11,7 +11,6 @@ public class OpenApiToolConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: openapi
         connection:
@@ -20,14 +19,12 @@ public class OpenApiToolConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<OpenApiTool>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<OpenApiTool>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("openapi", instance.Kind);
         Assert.Equal("full_sepcification_here", instance.Specification);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for OpenApiTool, WiP");
     }
 
     [Fact]

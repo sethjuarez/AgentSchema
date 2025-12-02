@@ -23,7 +23,7 @@ class Connection(ABC):
 
     kind: str = field(default="")
     authenticationMode: str = field(default="system")
-    usageDescription: Optional[str] = field(default="")
+    usageDescription: Optional[str] = None
 
     @staticmethod
     def load(data: Any) -> "Connection":
@@ -78,7 +78,7 @@ class ReferenceConnection(Connection):
 
     kind: str = field(default="reference")
     name: str = field(default="")
-    target: Optional[str] = field(default="")
+    target: Optional[str] = None
 
     @staticmethod
     def load(data: Any) -> "ReferenceConnection":

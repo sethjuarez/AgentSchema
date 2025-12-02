@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// The Bing search tool.
 /// </summary>
 [JsonConverter(typeof(WebSearchToolJsonConverter))]
-public class WebSearchTool : Tool, IYamlConvertible
+public class WebSearchTool : Tool
 {
     /// <summary>
     /// Initializes a new instance of <see cref="WebSearchTool"/>.
@@ -39,33 +35,4 @@ public class WebSearchTool : Tool, IYamlConvertible
     /// </summary>
     public IDictionary<string, object>? Options { get; set; }
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type WebSearchTool");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("connection"));
-        nestedObjectSerializer(Connection);
-
-        if (Options != null)
-        {
-            emitter.Emit(new Scalar("options"));
-            nestedObjectSerializer(Options);
-        }
-
-    }
 }

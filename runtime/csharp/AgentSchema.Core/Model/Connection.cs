@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -15,7 +11,7 @@ namespace AgentSchema.Core;
 /// but this section can accept additional via options.
 /// </summary>
 [JsonConverter(typeof(ConnectionJsonConverter))]
-public abstract class Connection : IYamlConvertible
+public abstract class Connection
 {
     /// <summary>
     /// Initializes a new instance of <see cref="Connection"/>.
@@ -41,72 +37,4 @@ public abstract class Connection : IYamlConvertible
     /// </summary>
     public string? UsageDescription { get; set; }
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type Connection");
-        }
-
-        // handle polymorphic types
-        if (node.Children.TryGetValue(new YamlScalarNode("kind"), out var discriminatorNode))
-        {
-            var discriminatorValue = (discriminatorNode as YamlScalarNode)?.Value;
-            switch (discriminatorValue)
-            {
-                case "reference":
-                    var referenceConnection = nestedObjectDeserializer(typeof(ReferenceConnection)) as ReferenceConnection;
-                    if (referenceConnection == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type ReferenceConnection");
-                    }
-                    return;
-                case "remote":
-                    var remoteConnection = nestedObjectDeserializer(typeof(RemoteConnection)) as RemoteConnection;
-                    if (remoteConnection == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type RemoteConnection");
-                    }
-                    return;
-                case "key":
-                    var keyConnection = nestedObjectDeserializer(typeof(ApiKeyConnection)) as ApiKeyConnection;
-                    if (keyConnection == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type ApiKeyConnection");
-                    }
-                    return;
-                case "anonymous":
-                    var anonymousConnection = nestedObjectDeserializer(typeof(AnonymousConnection)) as AnonymousConnection;
-                    if (anonymousConnection == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type AnonymousConnection");
-                    }
-                    return;
-                default:
-                    throw new YamlException($"Unknown type discriminator '' when parsing Connection");
-
-            }
-        }
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("authenticationMode"));
-        nestedObjectSerializer(AuthenticationMode);
-
-        if (UsageDescription != null)
-        {
-            emitter.Emit(new Scalar("usageDescription"));
-            nestedObjectSerializer(UsageDescription);
-        }
-
-    }
 }

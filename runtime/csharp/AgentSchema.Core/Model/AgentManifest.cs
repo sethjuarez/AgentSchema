@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -24,7 +20,7 @@ namespace AgentSchema.Core;
 /// (This notation is used elsewhere, but only the `param` scope is supported here)
 /// </summary>
 [JsonConverter(typeof(AgentManifestJsonConverter))]
-public class AgentManifest : IYamlConvertible
+public class AgentManifest
 {
     /// <summary>
     /// Initializes a new instance of <see cref="AgentManifest"/>.
@@ -70,49 +66,4 @@ public class AgentManifest : IYamlConvertible
     /// </summary>
     public IList<Resource> Resources { get; set; } = [];
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type AgentManifest");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("name"));
-        nestedObjectSerializer(Name);
-
-        emitter.Emit(new Scalar("displayName"));
-        nestedObjectSerializer(DisplayName);
-
-        if (Description != null)
-        {
-            emitter.Emit(new Scalar("description"));
-            nestedObjectSerializer(Description);
-        }
-
-
-        if (Metadata != null)
-        {
-            emitter.Emit(new Scalar("metadata"));
-            nestedObjectSerializer(Metadata);
-        }
-
-
-        emitter.Emit(new Scalar("template"));
-        nestedObjectSerializer(Template);
-
-        emitter.Emit(new Scalar("parameters"));
-        nestedObjectSerializer(Parameters);
-
-        emitter.Emit(new Scalar("resources"));
-        nestedObjectSerializer(Resources);
-    }
 }

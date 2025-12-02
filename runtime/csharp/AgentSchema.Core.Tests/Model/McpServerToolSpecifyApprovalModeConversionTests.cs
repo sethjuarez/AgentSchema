@@ -11,7 +11,6 @@ public class McpServerToolSpecifyApprovalModeConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: specify
         alwaysRequireApprovalTools:
@@ -21,13 +20,11 @@ public class McpServerToolSpecifyApprovalModeConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<McpServerToolSpecifyApprovalMode>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpServerToolSpecifyApprovalMode>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("specify", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpServerToolSpecifyApprovalMode, WiP");
     }
 
     [Fact]

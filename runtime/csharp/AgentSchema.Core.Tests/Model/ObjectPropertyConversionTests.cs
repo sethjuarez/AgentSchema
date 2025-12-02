@@ -11,7 +11,6 @@ public class ObjectPropertyConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         properties:
           property1:
@@ -21,12 +20,10 @@ public class ObjectPropertyConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ObjectProperty>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ObjectProperty>(yamlData);
 
         Assert.NotNull(instance);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ObjectProperty, WiP");
     }
 
     [Fact]

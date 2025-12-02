@@ -11,19 +11,16 @@ public class WorkflowConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: workflow
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Workflow>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Workflow>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("workflow", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Workflow, WiP");
     }
 
     [Fact]

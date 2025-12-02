@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// 
 /// </summary>
 [JsonConverter(typeof(OpenApiToolJsonConverter))]
-public class OpenApiTool : Tool, IYamlConvertible
+public class OpenApiTool : Tool
 {
     /// <summary>
     /// Initializes a new instance of <see cref="OpenApiTool"/>.
@@ -39,29 +35,4 @@ public class OpenApiTool : Tool, IYamlConvertible
     /// </summary>
     public string Specification { get; set; } = string.Empty;
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type OpenApiTool");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("connection"));
-        nestedObjectSerializer(Connection);
-
-        emitter.Emit(new Scalar("specification"));
-        nestedObjectSerializer(Specification);
-    }
 }

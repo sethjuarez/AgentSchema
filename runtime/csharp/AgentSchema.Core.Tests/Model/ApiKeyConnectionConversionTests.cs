@@ -11,7 +11,6 @@ public class ApiKeyConnectionConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: key
         endpoint: https://{your-custom-endpoint}.openai.azure.com/
@@ -19,15 +18,13 @@ public class ApiKeyConnectionConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ApiKeyConnection>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ApiKeyConnection>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("key", instance.Kind);
         Assert.Equal("https://{your-custom-endpoint}.openai.azure.com/", instance.Endpoint);
         Assert.Equal("your-api-key", instance.ApiKey);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ApiKeyConnection, WiP");
     }
 
     [Fact]

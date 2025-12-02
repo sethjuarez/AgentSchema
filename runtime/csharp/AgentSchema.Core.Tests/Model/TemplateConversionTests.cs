@@ -11,7 +11,6 @@ public class TemplateConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         format:
           kind: mustache
@@ -20,12 +19,10 @@ public class TemplateConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<Template>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<Template>(yamlData);
 
         Assert.NotNull(instance);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for Template, WiP");
     }
 
     [Fact]

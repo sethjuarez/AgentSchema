@@ -11,19 +11,16 @@ public class McpServerToolNeverRequireApprovalModeConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: never
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<McpServerToolNeverRequireApprovalMode>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<McpServerToolNeverRequireApprovalMode>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("never", instance.Kind);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for McpServerToolNeverRequireApprovalMode, WiP");
     }
 
     [Fact]

@@ -11,7 +11,6 @@ public class PropertySchemaConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         examples:
           - key: value
@@ -29,13 +28,11 @@ public class PropertySchemaConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<PropertySchema>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<PropertySchema>(yamlData);
 
         Assert.NotNull(instance);
         Assert.True(instance.Strict);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for PropertySchema, WiP");
     }
 
     [Fact]

@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -13,7 +9,7 @@ namespace AgentSchema.Core;
 /// Connection configuration for AI services using named connections.
 /// </summary>
 [JsonConverter(typeof(ReferenceConnectionJsonConverter))]
-public class ReferenceConnection : Connection, IYamlConvertible
+public class ReferenceConnection : Connection
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ReferenceConnection"/>.
@@ -39,33 +35,4 @@ public class ReferenceConnection : Connection, IYamlConvertible
     /// </summary>
     public string? Target { get; set; }
 
-
-    public new void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type ReferenceConnection");
-        }
-
-    }
-
-    public new void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("name"));
-        nestedObjectSerializer(Name);
-
-        if (Target != null)
-        {
-            emitter.Emit(new Scalar("target"));
-            nestedObjectSerializer(Target);
-        }
-
-    }
 }

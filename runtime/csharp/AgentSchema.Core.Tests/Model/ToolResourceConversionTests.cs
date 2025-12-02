@@ -11,7 +11,6 @@ public class ToolResourceConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         kind: tool
         id: web-search
@@ -20,14 +19,12 @@ public class ToolResourceConversionTests
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ToolResource>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ToolResource>(yamlData);
 
         Assert.NotNull(instance);
         Assert.Equal("tool", instance.Kind);
         Assert.Equal("web-search", instance.Id);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ToolResource, WiP");
     }
 
     [Fact]

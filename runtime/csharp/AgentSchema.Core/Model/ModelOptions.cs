@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -14,7 +10,7 @@ namespace AgentSchema.Core;
 /// `kind` is a required property here, but this section can accept additional via options.
 /// </summary>
 [JsonConverter(typeof(ModelOptionsJsonConverter))]
-public class ModelOptions : IYamlConvertible
+public class ModelOptions
 {
     /// <summary>
     /// Initializes a new instance of <see cref="ModelOptions"/>.
@@ -75,90 +71,4 @@ public class ModelOptions : IYamlConvertible
     /// </summary>
     public IDictionary<string, object>? AdditionalProperties { get; set; }
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type ModelOptions");
-        }
-
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        if (FrequencyPenalty != null)
-        {
-            emitter.Emit(new Scalar("frequencyPenalty"));
-            nestedObjectSerializer(FrequencyPenalty);
-        }
-
-
-        if (MaxOutputTokens != null)
-        {
-            emitter.Emit(new Scalar("maxOutputTokens"));
-            nestedObjectSerializer(MaxOutputTokens);
-        }
-
-
-        if (PresencePenalty != null)
-        {
-            emitter.Emit(new Scalar("presencePenalty"));
-            nestedObjectSerializer(PresencePenalty);
-        }
-
-
-        if (Seed != null)
-        {
-            emitter.Emit(new Scalar("seed"));
-            nestedObjectSerializer(Seed);
-        }
-
-
-        if (Temperature != null)
-        {
-            emitter.Emit(new Scalar("temperature"));
-            nestedObjectSerializer(Temperature);
-        }
-
-
-        if (TopK != null)
-        {
-            emitter.Emit(new Scalar("topK"));
-            nestedObjectSerializer(TopK);
-        }
-
-
-        if (TopP != null)
-        {
-            emitter.Emit(new Scalar("topP"));
-            nestedObjectSerializer(TopP);
-        }
-
-
-        if (StopSequences != null)
-        {
-            emitter.Emit(new Scalar("stopSequences"));
-            nestedObjectSerializer(StopSequences);
-        }
-
-
-        if (AllowMultipleToolCalls != null)
-        {
-            emitter.Emit(new Scalar("allowMultipleToolCalls"));
-            nestedObjectSerializer(AllowMultipleToolCalls);
-        }
-
-
-        if (AdditionalProperties != null)
-        {
-            emitter.Emit(new Scalar("additionalProperties"));
-            nestedObjectSerializer(AdditionalProperties);
-        }
-
-    }
 }

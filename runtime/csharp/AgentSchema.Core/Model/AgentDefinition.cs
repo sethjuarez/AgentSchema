@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft. All rights reserved.
 using System.Text.Json.Serialization;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
-using YamlDotNet.RepresentationModel;
 
 #pragma warning disable IDE0130
 namespace AgentSchema.Core;
@@ -16,7 +12,7 @@ namespace AgentSchema.Core;
 /// available tools, and template configurations for prompt rendering.
 /// </summary>
 [JsonConverter(typeof(AgentDefinitionJsonConverter))]
-public abstract class AgentDefinition : IYamlConvertible
+public abstract class AgentDefinition
 {
     /// <summary>
     /// Initializes a new instance of <see cref="AgentDefinition"/>.
@@ -62,93 +58,4 @@ public abstract class AgentDefinition : IYamlConvertible
     /// </summary>
     public PropertySchema? OutputSchema { get; set; }
 
-
-    public void Read(IParser parser, Type expectedType, ObjectDeserializer nestedObjectDeserializer)
-    {
-
-        var node = nestedObjectDeserializer(typeof(YamlMappingNode)) as YamlMappingNode;
-        if (node == null)
-        {
-            throw new YamlException("Expected a mapping node for type AgentDefinition");
-        }
-
-        // handle polymorphic types
-        if (node.Children.TryGetValue(new YamlScalarNode("kind"), out var discriminatorNode))
-        {
-            var discriminatorValue = (discriminatorNode as YamlScalarNode)?.Value;
-            switch (discriminatorValue)
-            {
-                case "prompt":
-                    var promptAgentDefinition = nestedObjectDeserializer(typeof(PromptAgent)) as PromptAgent;
-                    if (promptAgentDefinition == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type PromptAgent");
-                    }
-                    return;
-                case "workflow":
-                    var workflowAgentDefinition = nestedObjectDeserializer(typeof(Workflow)) as Workflow;
-                    if (workflowAgentDefinition == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type Workflow");
-                    }
-                    return;
-                case "hosted":
-                    var hostedAgentDefinition = nestedObjectDeserializer(typeof(ContainerAgent)) as ContainerAgent;
-                    if (hostedAgentDefinition == null)
-                    {
-                        throw new YamlException("Failed to deserialize polymorphic type ContainerAgent");
-                    }
-                    return;
-                default:
-                    throw new YamlException($"Unknown type discriminator '' when parsing AgentDefinition");
-
-            }
-        }
-    }
-
-    public void Write(IEmitter emitter, ObjectSerializer nestedObjectSerializer)
-    {
-        emitter.Emit(new MappingStart());
-
-        emitter.Emit(new Scalar("kind"));
-        nestedObjectSerializer(Kind);
-
-        emitter.Emit(new Scalar("name"));
-        nestedObjectSerializer(Name);
-
-        if (DisplayName != null)
-        {
-            emitter.Emit(new Scalar("displayName"));
-            nestedObjectSerializer(DisplayName);
-        }
-
-
-        if (Description != null)
-        {
-            emitter.Emit(new Scalar("description"));
-            nestedObjectSerializer(Description);
-        }
-
-
-        if (Metadata != null)
-        {
-            emitter.Emit(new Scalar("metadata"));
-            nestedObjectSerializer(Metadata);
-        }
-
-
-        if (InputSchema != null)
-        {
-            emitter.Emit(new Scalar("inputSchema"));
-            nestedObjectSerializer(InputSchema);
-        }
-
-
-        if (OutputSchema != null)
-        {
-            emitter.Emit(new Scalar("outputSchema"));
-            nestedObjectSerializer(OutputSchema);
-        }
-
-    }
 }

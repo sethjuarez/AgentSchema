@@ -11,19 +11,16 @@ public class ArrayPropertyConversionTests
     [Fact]
     public void LoadYamlInput()
     {
-        /*
         string yamlData = """
         items:
           kind: string
         
         """;
 
-        
-        var instance = YamlSerializer.Deserialize<ArrayProperty>(yamlData);
+        var serializer = Yaml.GetDeserializer();
+        var instance = serializer.Deserialize<ArrayProperty>(yamlData);
 
         Assert.NotNull(instance);
-        */
-        Console.WriteLine("YamlSerialization Currently incomplete for ArrayProperty, WiP");
     }
 
     [Fact]
