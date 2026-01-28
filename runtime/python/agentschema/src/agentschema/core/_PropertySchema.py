@@ -5,18 +5,17 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
+from ._context import LoadContext, SaveContext
 from ._Property import Property
-
 
 
 @dataclass
 class PropertySchema:
     """Definition for the property schema of a model.
     This includes the properties and example records.
-    
+
     Attributes
     ----------
     examples : Optional[dict[str, Any]]
@@ -26,6 +25,8 @@ class PropertySchema:
     properties : list[Property]
         The input properties for the schema
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     examples: Optional[dict[str, Any]] = field(default_factory=list)
     strict: Optional[bool] = None
@@ -41,10 +42,10 @@ class PropertySchema:
             PropertySchema: The loaded PropertySchema instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for PropertySchema: {data}")
 
@@ -56,20 +57,112 @@ class PropertySchema:
         if data is not None and "strict" in data:
             instance.strict = data["strict"]
         if data is not None and "properties" in data:
-            instance.properties = PropertySchema.load_properties(data["properties"], context)
+            instance.properties = PropertySchema.load_properties(
+                data["properties"], context
+            )
         if context is not None:
             instance = context.process_output(instance)
         return instance
 
-
     @staticmethod
-    def load_properties(data: dict | list, context: Optional[LoadContext]) -> list[Property]:
+    def load_properties(
+        data: dict | list, context: Optional[LoadContext]
+    ) -> list[Property]:
         if isinstance(data, dict):
             # convert simple named properties to list of Property
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "kind": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "kind": v})
+            data = result
         return [Property.load(item, context) for item in data]
 
+    @staticmethod
+    def save_properties(
+        items: list[Property], context: Optional[SaveContext]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
 
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, "_shorthand_property"):
+                    shorthand_prop = item._shorthand_property
+                    if (
+                        shorthand_prop
+                        and len(item_data) == 1
+                        and shorthand_prop in item_data
+                    ):
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
+
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the PropertySchema instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.examples is not None:
+            result["examples"] = obj.examples
+        if obj.strict is not None:
+            result["strict"] = obj.strict
+        if obj.properties is not None:
+            result["properties"] = PropertySchema.save_properties(
+                obj.properties, context
+            )
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the PropertySchema instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the PropertySchema instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

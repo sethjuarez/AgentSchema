@@ -20,9 +20,9 @@
 from abc import ABC
 {%- endif %}
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
+from ._context import LoadContext, SaveContext
 {%- for import in imports %}
 from ._{{ import }} import {{ import }}
 {%- endfor %}
@@ -45,6 +45,8 @@ class {{ node.typeName.name }}{% if node.base %}({{ node.base.name }}){% endif %
         {{ prop.description }}
 {%- endfor %}
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = {% if classCtx.shorthandProperty %}"{{ classCtx.shorthandProperty }}"{% else %}None{% endif %}
 {% for prop in node.properties %}
     {{ prop.name }}: {{ py.pythonType(prop, typeMapper) }}{{ py.defaultValue(prop, typeMapper) }}
 {%- endfor %}
@@ -91,11 +93,44 @@ class {{ node.typeName.name }}{% if node.base %}({{ node.base.name }}){% endif %
     def load_{{ collection.prop.name }}(data: dict | list, context: Optional[LoadContext]) -> list[{{ collection.prop.typeName.name }}]:
         if isinstance(data, dict):
             # convert simple named {{ collection.prop.name }} to list of {{ collection.prop.typeName.name }}
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "{{collection.type[0]}}": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "{{collection.type[0]}}": v})
+            data = result
         return [{{ collection.prop.typeName.name }}.load(item, context) for item in data]
+
+    @staticmethod
+    def save_{{ collection.prop.name }}(items: list[{{ collection.prop.typeName.name }}], context: Optional[SaveContext]) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
+        
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+        
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, '_shorthand_property'):
+                    shorthand_prop = item._shorthand_property
+                    if shorthand_prop and len(item_data) == 1 and shorthand_prop in item_data:
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
 {%- endfor %}
 {% if polymorphicTypes %}
 
@@ -129,4 +164,57 @@ class {{ node.typeName.name }}{% if node.base %}({{ node.base.name }}){% endif %
             return {{ node.typeName.name }}()
 {%- endif %}
 {%- endif %}
+
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the {{ node.typeName.name }} instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+        
+{% if node.base %}
+        # Start with parent class properties
+        result = super().save(context)
+{% else %}
+        result: dict[str, Any] = {}
+{%- endif %}
+{% for prop in node.properties %}
+        if obj.{{ prop.name }} is not None:
+            {{ py.saveProperty(prop, "obj", "result", node.typeName.name) }}
+{%- endfor %}
+{% if not node.base %}
+        if context is not None:
+            result = context.process_dict(result)
+{%- endif %}
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the {{ node.typeName.name }} instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the {{ node.typeName.name }} instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 {% endfor %}

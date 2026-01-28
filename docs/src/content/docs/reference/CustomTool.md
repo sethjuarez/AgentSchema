@@ -37,6 +37,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -48,6 +50,9 @@ options:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -55,3 +60,11 @@ options:
 | kind | string | The kind identifier for server tools. This is a wildcard and can represent any server tool type not explicitly defined.  |
 | connection | [Connection](../connection/) | Connection configuration for the server tool  |
 | options | dictionary | Configuration options for the server tool  |
+
+
+
+
+
+
+
+

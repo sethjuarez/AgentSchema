@@ -6,26 +6,29 @@
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
 class McpServerApprovalMode(ABC):
     """The approval mode for MCP server tools.
-    
+
     Attributes
     ----------
     kind : str
         The kind identifier for string approval modes
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = "kind"
+
     kind: str = field(default="")
 
     @staticmethod
-    def load(data: Any, context: Optional[LoadContext] = None) -> "McpServerApprovalMode":
+    def load(
+        data: Any, context: Optional[LoadContext] = None
+    ) -> "McpServerApprovalMode":
         """Load a McpServerApprovalMode instance.
         Args:
             data (Any): The data to load the instance from.
@@ -34,20 +37,19 @@ class McpServerApprovalMode(ABC):
             McpServerApprovalMode: The loaded McpServerApprovalMode instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         # handle alternate representations
         if isinstance(data, str):
             data = {"kind": data}
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for McpServerApprovalMode: {data}")
 
         # load polymorphic McpServerApprovalMode instance
         instance = McpServerApprovalMode.load_kind(data, context)
-
 
         if data is not None and "kind" in data:
             instance.kind = data["kind"]
@@ -55,10 +57,10 @@ class McpServerApprovalMode(ABC):
             instance = context.process_output(instance)
         return instance
 
-
-
     @staticmethod
-    def load_kind(data: dict, context: Optional[LoadContext]) -> "McpServerApprovalMode":
+    def load_kind(
+        data: dict, context: Optional[LoadContext]
+    ) -> "McpServerApprovalMode":
         # load polymorphic McpServerApprovalMode instance
         if data is not None and "kind" in data:
             discriminator_value = str(data["kind"]).lower()
@@ -70,27 +72,80 @@ class McpServerApprovalMode(ABC):
                 return McpServerToolSpecifyApprovalMode.load(data, context)
 
             else:
-                raise ValueError(f"Unknown McpServerApprovalMode discriminator value: {discriminator_value}")
+                raise ValueError(
+                    f"Unknown McpServerApprovalMode discriminator value: {discriminator_value}"
+                )
         else:
 
-            raise ValueError("Missing McpServerApprovalMode discriminator property: 'kind'")
+            raise ValueError(
+                "Missing McpServerApprovalMode discriminator property: 'kind'"
+            )
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the McpServerApprovalMode instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the McpServerApprovalMode instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the McpServerApprovalMode instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class McpServerToolAlwaysRequireApprovalMode(McpServerApprovalMode):
     """
-    
+
     Attributes
     ----------
     kind : str
         The kind identifier for always approval mode
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = None
+
     kind: str = field(default="always")
 
     @staticmethod
-    def load(data: Any, context: Optional[LoadContext] = None) -> "McpServerToolAlwaysRequireApprovalMode":
+    def load(
+        data: Any, context: Optional[LoadContext] = None
+    ) -> "McpServerToolAlwaysRequireApprovalMode":
         """Load a McpServerToolAlwaysRequireApprovalMode instance.
         Args:
             data (Any): The data to load the instance from.
@@ -99,12 +154,14 @@ class McpServerToolAlwaysRequireApprovalMode(McpServerApprovalMode):
             McpServerToolAlwaysRequireApprovalMode: The loaded McpServerToolAlwaysRequireApprovalMode instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
-            raise ValueError(f"Invalid data for McpServerToolAlwaysRequireApprovalMode: {data}")
+            raise ValueError(
+                f"Invalid data for McpServerToolAlwaysRequireApprovalMode: {data}"
+            )
 
         # create new instance
         instance = McpServerToolAlwaysRequireApprovalMode()
@@ -115,23 +172,70 @@ class McpServerToolAlwaysRequireApprovalMode(McpServerApprovalMode):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the McpServerToolAlwaysRequireApprovalMode instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the McpServerToolAlwaysRequireApprovalMode instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the McpServerToolAlwaysRequireApprovalMode instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class McpServerToolNeverRequireApprovalMode(McpServerApprovalMode):
     """
-    
+
     Attributes
     ----------
     kind : str
         The kind identifier for never approval mode
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = None
+
     kind: str = field(default="never")
 
     @staticmethod
-    def load(data: Any, context: Optional[LoadContext] = None) -> "McpServerToolNeverRequireApprovalMode":
+    def load(
+        data: Any, context: Optional[LoadContext] = None
+    ) -> "McpServerToolNeverRequireApprovalMode":
         """Load a McpServerToolNeverRequireApprovalMode instance.
         Args:
             data (Any): The data to load the instance from.
@@ -140,12 +244,14 @@ class McpServerToolNeverRequireApprovalMode(McpServerApprovalMode):
             McpServerToolNeverRequireApprovalMode: The loaded McpServerToolNeverRequireApprovalMode instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
-            raise ValueError(f"Invalid data for McpServerToolNeverRequireApprovalMode: {data}")
+            raise ValueError(
+                f"Invalid data for McpServerToolNeverRequireApprovalMode: {data}"
+            )
 
         # create new instance
         instance = McpServerToolNeverRequireApprovalMode()
@@ -156,13 +262,56 @@ class McpServerToolNeverRequireApprovalMode(McpServerApprovalMode):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the McpServerToolNeverRequireApprovalMode instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the McpServerToolNeverRequireApprovalMode instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the McpServerToolNeverRequireApprovalMode instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class McpServerToolSpecifyApprovalMode(McpServerApprovalMode):
     """
-    
+
     Attributes
     ----------
     kind : str
@@ -173,12 +322,16 @@ class McpServerToolSpecifyApprovalMode(McpServerApprovalMode):
         List of tools that never require approval
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = None
+
     kind: str = field(default="specify")
     alwaysRequireApprovalTools: list[str] = field(default_factory=list)
     neverRequireApprovalTools: list[str] = field(default_factory=list)
 
     @staticmethod
-    def load(data: Any, context: Optional[LoadContext] = None) -> "McpServerToolSpecifyApprovalMode":
+    def load(
+        data: Any, context: Optional[LoadContext] = None
+    ) -> "McpServerToolSpecifyApprovalMode":
         """Load a McpServerToolSpecifyApprovalMode instance.
         Args:
             data (Any): The data to load the instance from.
@@ -187,12 +340,14 @@ class McpServerToolSpecifyApprovalMode(McpServerApprovalMode):
             McpServerToolSpecifyApprovalMode: The loaded McpServerToolSpecifyApprovalMode instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
-            raise ValueError(f"Invalid data for McpServerToolSpecifyApprovalMode: {data}")
+            raise ValueError(
+                f"Invalid data for McpServerToolSpecifyApprovalMode: {data}"
+            )
 
         # create new instance
         instance = McpServerToolSpecifyApprovalMode()
@@ -207,5 +362,51 @@ class McpServerToolSpecifyApprovalMode(McpServerApprovalMode):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the McpServerToolSpecifyApprovalMode instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.alwaysRequireApprovalTools is not None:
+            result["alwaysRequireApprovalTools"] = obj.alwaysRequireApprovalTools
+        if obj.neverRequireApprovalTools is not None:
+            result["neverRequireApprovalTools"] = obj.neverRequireApprovalTools
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the McpServerToolSpecifyApprovalMode instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the McpServerToolSpecifyApprovalMode instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

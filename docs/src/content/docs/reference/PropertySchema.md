@@ -37,6 +37,8 @@ classDiagram
     PropertySchema *-- Property
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -56,6 +58,9 @@ properties:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -64,8 +69,15 @@ properties:
 | strict | boolean | Whether the input schema is strict - if true, only the defined properties are allowed  |
 | properties | [Property[]](../property/) | The input properties for the schema (Related Types: [ArrayProperty](../arrayproperty/), [ObjectProperty](../objectproperty/)) |
 
-## Composed Types
 
+
+
+
+
+
+## Composed Types
 The following types are composed within `PropertySchema`:
 
 - [Property](../property/)
+
+

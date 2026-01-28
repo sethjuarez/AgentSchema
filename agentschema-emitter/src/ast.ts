@@ -607,6 +607,8 @@ export interface PythonClassContext {
   imports: string[];
   /** Collection properties with their nested type info for load_* methods */
   collectionTypes: Array<{ prop: PropertyNode; type: string[] }>;
+  /** The property name that can be used as a shorthand scalar representation */
+  shorthandProperty: string | null;
 }
 
 /**

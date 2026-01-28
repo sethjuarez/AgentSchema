@@ -39,6 +39,8 @@ classDiagram
     FunctionTool *-- PropertySchema
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -58,6 +60,9 @@ strict: true
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -66,8 +71,15 @@ strict: true
 | parameters | [PropertySchema](../propertyschema/) | Parameters accepted by the function tool  |
 | strict | boolean | Indicates whether the function tool enforces strict validation on its parameters  |
 
-## Composed Types
 
+
+
+
+
+
+## Composed Types
 The following types are composed within `FunctionTool`:
 
 - [PropertySchema](../propertyschema/)
+
+

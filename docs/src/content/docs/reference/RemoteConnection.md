@@ -32,6 +32,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -41,6 +43,9 @@ endpoint: https://{your-custom-endpoint}.openai.azure.com/
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -48,3 +53,11 @@ endpoint: https://{your-custom-endpoint}.openai.azure.com/
 | kind | string | The Authentication kind for the AI service (e.g., &#39;key&#39; for API key, &#39;oauth&#39; for OAuth tokens)  |
 | name | string | The name of the connection  |
 | endpoint | string | The endpoint URL for the AI service  |
+
+
+
+
+
+
+
+

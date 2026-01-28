@@ -33,6 +33,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -43,6 +45,9 @@ specification: full_sepcification_here
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -50,3 +55,11 @@ specification: full_sepcification_here
 | kind | string | The kind identifier for OpenAPI tools  |
 | connection | [Connection](../connection/) | The connection configuration for the OpenAPI tool  |
 | specification | string | The full OpenAPI specification  |
+
+
+
+
+
+
+
+

@@ -33,6 +33,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -43,9 +45,20 @@ fileIds:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | kind | string | The kind identifier for code interpreter tools  |
 | fileIds | string[] | The IDs of the files to be used by the code interpreter tool.  |
+
+
+
+
+
+
+
+

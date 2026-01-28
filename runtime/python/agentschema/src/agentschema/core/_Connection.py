@@ -6,10 +6,9 @@
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
@@ -17,7 +16,7 @@ class Connection(ABC):
     """Connection configuration for AI agents.
     `provider`, `kind`, and `endpoint` are required properties here,
     but this section can accept additional via options.
-    
+
     Attributes
     ----------
     kind : str
@@ -27,6 +26,8 @@ class Connection(ABC):
     usageDescription : Optional[str]
         The usage description for the connection, providing context on how this connection will be used
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="")
     authenticationMode: str = field(default="system")
@@ -42,16 +43,15 @@ class Connection(ABC):
             Connection: The loaded Connection instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Connection: {data}")
 
         # load polymorphic Connection instance
         instance = Connection.load_kind(data, context)
-
 
         if data is not None and "kind" in data:
             instance.kind = data["kind"]
@@ -62,8 +62,6 @@ class Connection(ABC):
         if context is not None:
             instance = context.process_output(instance)
         return instance
-
-
 
     @staticmethod
     def load_kind(data: dict, context: Optional[LoadContext]) -> "Connection":
@@ -80,17 +78,68 @@ class Connection(ABC):
                 return AnonymousConnection.load(data, context)
 
             else:
-                raise ValueError(f"Unknown Connection discriminator value: {discriminator_value}")
+                raise ValueError(
+                    f"Unknown Connection discriminator value: {discriminator_value}"
+                )
         else:
 
             raise ValueError("Missing Connection discriminator property: 'kind'")
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Connection instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.authenticationMode is not None:
+            result["authenticationMode"] = obj.authenticationMode
+        if obj.usageDescription is not None:
+            result["usageDescription"] = obj.usageDescription
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Connection instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Connection instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class ReferenceConnection(Connection):
     """Connection configuration for AI services using named connections.
-    
+
     Attributes
     ----------
     kind : str
@@ -100,6 +149,8 @@ class ReferenceConnection(Connection):
     target : Optional[str]
         The target resource or service that this connection refers to
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="reference")
     name: str = field(default="")
@@ -115,10 +166,10 @@ class ReferenceConnection(Connection):
             ReferenceConnection: The loaded ReferenceConnection instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ReferenceConnection: {data}")
 
@@ -135,13 +186,60 @@ class ReferenceConnection(Connection):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ReferenceConnection instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.target is not None:
+            result["target"] = obj.target
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ReferenceConnection instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ReferenceConnection instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class RemoteConnection(Connection):
     """Connection configuration for AI services using named connections.
-    
+
     Attributes
     ----------
     kind : str
@@ -151,6 +249,8 @@ class RemoteConnection(Connection):
     endpoint : str
         The endpoint URL for the AI service
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="remote")
     name: str = field(default="")
@@ -166,10 +266,10 @@ class RemoteConnection(Connection):
             RemoteConnection: The loaded RemoteConnection instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for RemoteConnection: {data}")
 
@@ -186,13 +286,60 @@ class RemoteConnection(Connection):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the RemoteConnection instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.endpoint is not None:
+            result["endpoint"] = obj.endpoint
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the RemoteConnection instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the RemoteConnection instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class ApiKeyConnection(Connection):
     """Connection configuration for AI services using API keys.
-    
+
     Attributes
     ----------
     kind : str
@@ -202,6 +349,8 @@ class ApiKeyConnection(Connection):
     apiKey : str
         The API key for authenticating with the AI service
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="key")
     endpoint: str = field(default="")
@@ -217,10 +366,10 @@ class ApiKeyConnection(Connection):
             ApiKeyConnection: The loaded ApiKeyConnection instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ApiKeyConnection: {data}")
 
@@ -237,13 +386,60 @@ class ApiKeyConnection(Connection):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ApiKeyConnection instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.endpoint is not None:
+            result["endpoint"] = obj.endpoint
+        if obj.apiKey is not None:
+            result["apiKey"] = obj.apiKey
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ApiKeyConnection instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ApiKeyConnection instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class AnonymousConnection(Connection):
     """
-    
+
     Attributes
     ----------
     kind : str
@@ -251,6 +447,8 @@ class AnonymousConnection(Connection):
     endpoint : str
         The endpoint for authenticating with the AI service
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="anonymous")
     endpoint: str = field(default="")
@@ -265,10 +463,10 @@ class AnonymousConnection(Connection):
             AnonymousConnection: The loaded AnonymousConnection instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for AnonymousConnection: {data}")
 
@@ -283,5 +481,49 @@ class AnonymousConnection(Connection):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the AnonymousConnection instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.endpoint is not None:
+            result["endpoint"] = obj.endpoint
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the AnonymousConnection instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the AnonymousConnection instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

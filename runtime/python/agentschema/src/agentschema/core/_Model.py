@@ -5,12 +5,11 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
+from ._context import LoadContext, SaveContext
 from ._Connection import Connection
 from ._ModelOptions import ModelOptions
-
 
 
 @dataclass
@@ -18,7 +17,7 @@ class Model:
     """Model for defining the structure and behavior of AI agents.
     This model includes properties for specifying the model's provider, connection details, and various options.
     It allows for flexible configuration of AI models to suit different use cases and requirements.
-    
+
     Attributes
     ----------
     id : str
@@ -32,6 +31,8 @@ class Model:
     options : Optional[ModelOptions]
         Additional options for the model
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = "id"
 
     id: str = field(default="")
     provider: Optional[str] = None
@@ -49,14 +50,14 @@ class Model:
             Model: The loaded Model instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         # handle alternate representations
         if isinstance(data, str):
             data = {"id": data}
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Model: {data}")
 
@@ -77,5 +78,56 @@ class Model:
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Model instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        result: dict[str, Any] = {}
+
+        if obj.id is not None:
+            result["id"] = obj.id
+        if obj.provider is not None:
+            result["provider"] = obj.provider
+        if obj.apiType is not None:
+            result["apiType"] = obj.apiType
+        if obj.connection is not None:
+            result["connection"] = obj.connection.save(context)
+        if obj.options is not None:
+            result["options"] = obj.options.save(context)
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Model instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Model instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

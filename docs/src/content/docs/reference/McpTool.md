@@ -40,6 +40,8 @@ classDiagram
     McpTool *-- McpServerApprovalMode
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -56,6 +58,9 @@ allowedTools:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -67,8 +72,15 @@ allowedTools:
 | approvalMode | [McpServerApprovalMode](../mcpserverapprovalmode/) | The approval mode for the MCP tool, either &#39;auto&#39; or &#39;manual&#39; (Related Types: [McpServerToolAlwaysRequireApprovalMode](../mcpservertoolalwaysrequireapprovalmode/), [McpServerToolNeverRequireApprovalMode](../mcpservertoolneverrequireapprovalmode/), [McpServerToolSpecifyApprovalMode](../mcpservertoolspecifyapprovalmode/)) |
 | allowedTools | string[] | List of allowed operations or resources for the MCP tool  |
 
-## Composed Types
 
+
+
+
+
+
+## Composed Types
 The following types are composed within `McpTool`:
 
 - [McpServerApprovalMode](../mcpserverapprovalmode/)
+
+

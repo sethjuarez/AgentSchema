@@ -5,17 +5,16 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
 class ModelOptions:
     """Options for configuring the behavior of the AI model.
     `kind` is a required property here, but this section can accept additional via options.
-    
+
     Attributes
     ----------
     frequencyPenalty : Optional[float]
@@ -40,6 +39,8 @@ class ModelOptions:
         Additional custom properties for model options
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = None
+
     frequencyPenalty: Optional[float] = None
     maxOutputTokens: Optional[int] = None
     presencePenalty: Optional[float] = None
@@ -61,10 +62,10 @@ class ModelOptions:
             ModelOptions: The loaded ModelOptions instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ModelOptions: {data}")
 
@@ -95,5 +96,66 @@ class ModelOptions:
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ModelOptions instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        result: dict[str, Any] = {}
+
+        if obj.frequencyPenalty is not None:
+            result["frequencyPenalty"] = obj.frequencyPenalty
+        if obj.maxOutputTokens is not None:
+            result["maxOutputTokens"] = obj.maxOutputTokens
+        if obj.presencePenalty is not None:
+            result["presencePenalty"] = obj.presencePenalty
+        if obj.seed is not None:
+            result["seed"] = obj.seed
+        if obj.temperature is not None:
+            result["temperature"] = obj.temperature
+        if obj.topK is not None:
+            result["topK"] = obj.topK
+        if obj.topP is not None:
+            result["topP"] = obj.topP
+        if obj.stopSequences is not None:
+            result["stopSequences"] = obj.stopSequences
+        if obj.allowMultipleToolCalls is not None:
+            result["allowMultipleToolCalls"] = obj.allowMultipleToolCalls
+        if obj.additionalProperties is not None:
+            result["additionalProperties"] = obj.additionalProperties
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ModelOptions instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ModelOptions instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

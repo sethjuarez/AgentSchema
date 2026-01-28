@@ -25,6 +25,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -33,9 +35,20 @@ version: v0.1.1
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | protocol | string | The protocol type.  |
 | version | string | The version string for the protocol, e.g. &#39;v0.1.1&#39;.  |
+
+
+
+
+
+
+
+

@@ -1,4 +1,7 @@
 import { EmitContext, emitFile, resolvePath } from "@typespec/compiler";
+import { execSync } from "child_process";
+import { existsSync } from "fs";
+import { dirname, resolve } from "path";
 import { EmitTarget, AgentSchemaEmitterOptions } from "./lib.js";
 import {
   enumerateTypes,
@@ -53,6 +56,9 @@ export const generatePython = async (
   // Determine package name from root node namespace (e.g., "agentschema.core")
   const packageName = node.typeName.namespace.toLowerCase();
 
+  // Emit py.typed marker for PEP 561 compliance
+  await emitPythonFile(context, 'py.typed', '', emitTarget["output-dir"]);
+
   // Render LoadContext file
   const contextContext = buildLoadContextContext();
   const contextContent = engine.render('context.py.njk', contextContext);
@@ -86,7 +92,79 @@ export const generatePython = async (
       await emitPythonFile(context, `test_load_${n.typeName.name.toLowerCase()}.py`, testContent, emitTarget["test-dir"]);
     }
   }
+
+  // Format emitted files if format option is enabled (default: true)
+  if (emitTarget.format !== false) {
+    // Resolve output paths relative to current working directory (where tsp compile was run)
+    const outputDir = emitTarget["output-dir"]
+      ? resolve(process.cwd(), emitTarget["output-dir"])
+      : context.emitterOutputDir;
+    const testDir = emitTarget["test-dir"]
+      ? resolve(process.cwd(), emitTarget["test-dir"])
+      : undefined;
+
+    formatPythonFiles(outputDir, testDir);
+  }
 };
+
+/**
+ * Format Python files using ruff and black formatters.
+ * Runs formatters via uv from the Python project root (where pyproject.toml is located).
+ */
+function formatPythonFiles(outputDir: string, testDir?: string): void {
+  // Find the Python project root by looking for pyproject.toml
+  const projectRoot = findPythonProjectRoot(outputDir);
+  if (!projectRoot) {
+    console.warn(`Warning: Could not find pyproject.toml. Skipping formatting.`);
+    return;
+  }
+
+  const dirs = [outputDir, ...(testDir ? [testDir] : [])];
+
+  for (const dir of dirs) {
+    // Run ruff check with auto-fix
+    try {
+      execSync(`uv run ruff check --fix "${dir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe',
+        encoding: 'utf-8'
+      });
+    } catch (error) {
+      console.warn(`Warning: ruff formatting failed for ${dir}. You may need to install ruff or run it manually.`);
+    }
+
+    // Run black formatter
+    try {
+      execSync(`uv run black "${dir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe',
+        encoding: 'utf-8'
+      });
+    } catch (error) {
+      console.warn(`Warning: black formatting failed for ${dir}. You may need to install black or run it manually.`);
+    }
+  }
+}
+
+/**
+ * Find the Python project root by traversing up from the output directory
+ * looking for pyproject.toml.
+ */
+function findPythonProjectRoot(startDir: string): string | undefined {
+  let currentDir = resolve(startDir);
+  const root = resolve('/');
+
+  // On Windows, also check for drive root (e.g., "C:\")
+  while (currentDir !== root && currentDir !== dirname(currentDir)) {
+    const pyprojectPath = resolve(currentDir, 'pyproject.toml');
+    if (existsSync(pyprojectPath)) {
+      return currentDir;
+    }
+    currentDir = dirname(currentDir);
+  }
+
+  return undefined;
+}
 
 /**
  * Build context for rendering a single Python class.
@@ -99,6 +177,7 @@ function buildClassContext(node: TypeNode): PythonClassContext {
     polymorphicTypes: node.retrievePolymorphicTypes(),
     imports: getUniqueImportTypes(node),
     collectionTypes: getCollectionTypes(node),
+    shorthandProperty: getShorthandProperty(node),
   };
 }
 
@@ -217,6 +296,26 @@ function prepareAlternates(node: TypeNode): Array<{ scalar: string; alternate: s
       .replaceAll('\n', '')
       .replaceAll('"{value}"', ' data'),
   }));
+}
+
+/**
+ * Get the shorthand property name from alternates.
+ * The shorthand property is the one that receives "{value}" in the expansion.
+ */
+function getShorthandProperty(node: TypeNode): string | null {
+  if (!node.alternates || node.alternates.length === 0) {
+    return null;
+  }
+
+  // Look for a property that has "{value}" as its expansion value
+  for (const alt of node.alternates) {
+    for (const [key, value] of Object.entries(alt.expansion)) {
+      if (value === "{value}") {
+        return key;
+      }
+    }
+  }
+  return null;
 }
 
 /**

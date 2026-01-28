@@ -5,13 +5,12 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
+from ._context import LoadContext, SaveContext
 from ._AgentDefinition import AgentDefinition
 from ._PropertySchema import PropertySchema
 from ._Resource import Resource
-
 
 
 @dataclass
@@ -20,15 +19,15 @@ class AgentManifest:
     It includes parameters that can be used to configure the agent's behavior.
     These parameters include values that can be used as publisher parameters that can
     be used to describe additional variables that have been tested and are known to work.
-    
+
     Variables described here are then used to project into a prompt agent that can be executed.
     Once parameters are provided, these can be referenced in the manifest using the following notation:
-    
+
     `{{myParameter}}`
-    
+
     This allows for dynamic configuration of the agent based on the provided parameters.
     (This notation is used elsewhere, but only the `param` scope is supported here)
-    
+
     Attributes
     ----------
     name : str
@@ -46,6 +45,8 @@ class AgentManifest:
     resources : list[Resource]
         Resources required by the agent, such as models or tools
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     name: str = field(default="")
     displayName: str = field(default="")
@@ -65,10 +66,10 @@ class AgentManifest:
             AgentManifest: The loaded AgentManifest instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for AgentManifest: {data}")
 
@@ -88,20 +89,118 @@ class AgentManifest:
         if data is not None and "parameters" in data:
             instance.parameters = PropertySchema.load(data["parameters"], context)
         if data is not None and "resources" in data:
-            instance.resources = AgentManifest.load_resources(data["resources"], context)
+            instance.resources = AgentManifest.load_resources(
+                data["resources"], context
+            )
         if context is not None:
             instance = context.process_output(instance)
         return instance
 
-
     @staticmethod
-    def load_resources(data: dict | list, context: Optional[LoadContext]) -> list[Resource]:
+    def load_resources(
+        data: dict | list, context: Optional[LoadContext]
+    ) -> list[Resource]:
         if isinstance(data, dict):
             # convert simple named resources to list of Resource
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "kind": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "kind": v})
+            data = result
         return [Resource.load(item, context) for item in data]
 
+    @staticmethod
+    def save_resources(
+        items: list[Resource], context: Optional[SaveContext]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
 
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, "_shorthand_property"):
+                    shorthand_prop = item._shorthand_property
+                    if (
+                        shorthand_prop
+                        and len(item_data) == 1
+                        and shorthand_prop in item_data
+                    ):
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
+
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the AgentManifest instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.displayName is not None:
+            result["displayName"] = obj.displayName
+        if obj.description is not None:
+            result["description"] = obj.description
+        if obj.metadata is not None:
+            result["metadata"] = obj.metadata
+        if obj.template is not None:
+            result["template"] = obj.template.save(context)
+        if obj.parameters is not None:
+            result["parameters"] = obj.parameters.save(context)
+        if obj.resources is not None:
+            result["resources"] = AgentManifest.save_resources(obj.resources, context)
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the AgentManifest instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the AgentManifest instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

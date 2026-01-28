@@ -31,6 +31,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -41,6 +43,9 @@ options:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -48,3 +53,11 @@ options:
 | kind | string | The kind identifier for tool resources  |
 | id | string | The unique identifier of the tool resource  |
 | options | dictionary | Configuration options for the tool resource  |
+
+
+
+
+
+
+
+

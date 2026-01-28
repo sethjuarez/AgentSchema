@@ -6,10 +6,9 @@
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
@@ -17,7 +16,7 @@ class Resource(ABC):
     """Represents a resource required by the agent
     Resources can include databases, APIs, or other external systems
     that the agent needs to interact with to perform its tasks
-    
+
     Attributes
     ----------
     name : str
@@ -25,6 +24,8 @@ class Resource(ABC):
     kind : str
         The kind of resource (e.g., model, tool)
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     name: str = field(default="")
     kind: str = field(default="")
@@ -39,16 +40,15 @@ class Resource(ABC):
             Resource: The loaded Resource instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Resource: {data}")
 
         # load polymorphic Resource instance
         instance = Resource.load_kind(data, context)
-
 
         if data is not None and "name" in data:
             instance.name = data["name"]
@@ -57,8 +57,6 @@ class Resource(ABC):
         if context is not None:
             instance = context.process_output(instance)
         return instance
-
-
 
     @staticmethod
     def load_kind(data: dict, context: Optional[LoadContext]) -> "Resource":
@@ -71,17 +69,66 @@ class Resource(ABC):
                 return ToolResource.load(data, context)
 
             else:
-                raise ValueError(f"Unknown Resource discriminator value: {discriminator_value}")
+                raise ValueError(
+                    f"Unknown Resource discriminator value: {discriminator_value}"
+                )
         else:
 
             raise ValueError("Missing Resource discriminator property: 'kind'")
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Resource instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Resource instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Resource instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class ModelResource(Resource):
     """Represents a model resource required by the agent
-    
+
     Attributes
     ----------
     kind : str
@@ -89,6 +136,8 @@ class ModelResource(Resource):
     id : str
         The unique identifier of the model resource
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="model")
     id: str = field(default="")
@@ -103,10 +152,10 @@ class ModelResource(Resource):
             ModelResource: The loaded ModelResource instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ModelResource: {data}")
 
@@ -121,13 +170,58 @@ class ModelResource(Resource):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ModelResource instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.id is not None:
+            result["id"] = obj.id
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ModelResource instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ModelResource instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
 class ToolResource(Resource):
     """Represents a tool resource required by the agent
-    
+
     Attributes
     ----------
     kind : str
@@ -137,6 +231,8 @@ class ToolResource(Resource):
     options : dict[str, Any]
         Configuration options for the tool resource
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="tool")
     id: str = field(default="")
@@ -152,10 +248,10 @@ class ToolResource(Resource):
             ToolResource: The loaded ToolResource instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ToolResource: {data}")
 
@@ -172,5 +268,51 @@ class ToolResource(Resource):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ToolResource instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.id is not None:
+            result["id"] = obj.id
+        if obj.options is not None:
+            result["options"] = obj.options
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ToolResource instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ToolResource instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

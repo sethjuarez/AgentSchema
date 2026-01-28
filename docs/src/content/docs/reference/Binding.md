@@ -25,6 +25,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -33,6 +35,9 @@ input: input-variable
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -40,22 +45,28 @@ input: input-variable
 | name | string | Name of the binding  |
 | input | string | The input property that will be bound to the tool parameter argument  |
 
+
+
+
+
+
+
+
+
 ## Alternate Constructions
 
-The following alternate constructions are available for `Binding`.
+The following alternate constructions are available for `Binding`. 
 These allow for simplified creation of instances using a single property.
 
-### string
+### string 
+
 
 The following simplified representation can be used:
-
 ```yaml
 value: "example"
 
 ```
-
 This is equivalent to the full representation:
-
 ```yaml
 value:
   input: "example"

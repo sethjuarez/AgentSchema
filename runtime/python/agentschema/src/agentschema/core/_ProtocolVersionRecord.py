@@ -5,16 +5,15 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
 class ProtocolVersionRecord:
     """
-    
+
     Attributes
     ----------
     protocol : str
@@ -23,11 +22,15 @@ class ProtocolVersionRecord:
         The version string for the protocol, e.g. 'v0.1.1'.
     """
 
+    _shorthand_property: ClassVar[Optional[str]] = None
+
     protocol: str = field(default="")
     version: str = field(default="")
 
     @staticmethod
-    def load(data: Any, context: Optional[LoadContext] = None) -> "ProtocolVersionRecord":
+    def load(
+        data: Any, context: Optional[LoadContext] = None
+    ) -> "ProtocolVersionRecord":
         """Load a ProtocolVersionRecord instance.
         Args:
             data (Any): The data to load the instance from.
@@ -36,10 +39,10 @@ class ProtocolVersionRecord:
             ProtocolVersionRecord: The loaded ProtocolVersionRecord instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ProtocolVersionRecord: {data}")
 
@@ -54,5 +57,50 @@ class ProtocolVersionRecord:
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ProtocolVersionRecord instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        result: dict[str, Any] = {}
+
+        if obj.protocol is not None:
+            result["protocol"] = obj.protocol
+        if obj.version is not None:
+            result["version"] = obj.version
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ProtocolVersionRecord instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ProtocolVersionRecord instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

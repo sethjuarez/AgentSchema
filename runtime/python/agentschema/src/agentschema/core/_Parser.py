@@ -5,16 +5,15 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
 class Parser:
     """Template parser definition
-    
+
     Attributes
     ----------
     kind : str
@@ -22,6 +21,8 @@ class Parser:
     options : Optional[dict[str, Any]]
         Options for the parser
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = "kind"
 
     kind: str = field(default="*")
     options: Optional[dict[str, Any]] = None
@@ -36,14 +37,14 @@ class Parser:
             Parser: The loaded Parser instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         # handle alternate representations
         if isinstance(data, str):
             data = {"kind": data}
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Parser: {data}")
 
@@ -58,5 +59,50 @@ class Parser:
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Parser instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        result: dict[str, Any] = {}
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.options is not None:
+            result["options"] = obj.options
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Parser instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Parser instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

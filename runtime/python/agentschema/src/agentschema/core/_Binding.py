@@ -5,16 +5,15 @@
 ##########################################
 
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
-
+from ._context import LoadContext, SaveContext
 
 
 @dataclass
 class Binding:
     """Represents a binding between an input property and a tool parameter.
-    
+
     Attributes
     ----------
     name : str
@@ -22,6 +21,8 @@ class Binding:
     input : str
         The input property that will be bound to the tool parameter argument
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = "input"
 
     name: str = field(default="")
     input: str = field(default="")
@@ -36,14 +37,14 @@ class Binding:
             Binding: The loaded Binding instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         # handle alternate representations
         if isinstance(data, str):
             data = {"input": data}
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Binding: {data}")
 
@@ -58,5 +59,50 @@ class Binding:
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Binding instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
 
+        result: dict[str, Any] = {}
+
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.input is not None:
+            result["input"] = obj.input
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Binding instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Binding instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)

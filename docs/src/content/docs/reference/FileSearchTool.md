@@ -38,6 +38,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -56,6 +58,9 @@ filters:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -67,3 +72,11 @@ filters:
 | ranker | string | File search ranker.  |
 | scoreThreshold | float32 | Ranker search threshold.  |
 | filters | dictionary | Additional filters to apply during the file search.  |
+
+
+
+
+
+
+
+

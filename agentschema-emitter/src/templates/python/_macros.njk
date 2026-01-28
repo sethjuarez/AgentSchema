@@ -140,6 +140,35 @@ list[{{ baseType }}]
 
 
 {# ============================================================================
+   Property Serialization Rendering (for save() method)
+   ============================================================================ #}
+
+{#
+  Render property serialization statement for saving to dict.
+  
+  Handles:
+  - Scalars and dicts -> direct assignment to dict
+  - Collections -> map save() over items
+  - Complex types -> call .save() method
+  
+  @param prop - PropertyNode being serialized
+  @param varName - Variable name of the object (e.g., "self")
+  @param dictName - Dict variable name to write to (e.g., "result")
+  
+  Usage: {{ saveProperty(prop, "self", "result") }}
+#}
+{% macro saveProperty(prop, varName, dictName, parentTypeName) %}
+{%- if prop.isScalar or prop.isDict -%}
+{{ dictName }}["{{ prop.name }}"] = {{ varName }}.{{ prop.name }}
+{%- elif prop.isCollection -%}
+{{ dictName }}["{{ prop.name }}"] = {{ parentTypeName }}.save_{{ prop.name }}({{ varName }}.{{ prop.name }}, context)
+{%- else -%}
+{{ dictName }}["{{ prop.name }}"] = {{ varName }}.{{ prop.name }}.save(context)
+{%- endif -%}
+{% endmacro %}
+
+
+{# ============================================================================
    Docstring Rendering
    ============================================================================ #}
 

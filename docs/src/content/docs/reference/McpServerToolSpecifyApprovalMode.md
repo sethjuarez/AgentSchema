@@ -30,6 +30,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -41,6 +43,9 @@ neverRequireApprovalTools:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -48,3 +53,11 @@ neverRequireApprovalTools:
 | kind | string | The kind identifier for specify approval mode  |
 | alwaysRequireApprovalTools | string[] | List of tools that always require approval  |
 | neverRequireApprovalTools | string[] | List of tools that never require approval  |
+
+
+
+
+
+
+
+

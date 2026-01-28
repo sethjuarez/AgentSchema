@@ -33,6 +33,8 @@ classDiagram
     }
 ```
 
+
+
 ## Yaml Example
 
 ```yaml
@@ -48,6 +50,9 @@ options:
 
 ```
 
+
+
+
 ## Properties
 
 | Name | Type | Description |
@@ -55,3 +60,11 @@ options:
 | kind | string | The kind identifier for Bing search tools  |
 | connection | [Connection](../connection/) | The connection configuration for the Bing search tool  |
 | options | dictionary | The configuration options for the Bing search tool  |
+
+
+
+
+
+
+
+

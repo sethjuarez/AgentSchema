@@ -48,6 +48,54 @@ def test_load_yaml_{{node.typeName.name | lower}}{% if not loop.first %}_{{loop.
     assert instance.{{ validation.key }} == {{ validation.delimeter }}{{ validation.value }}{{ validation.delimeter }}
     {%- endif %}
     {%- endfor %}
+
+def test_roundtrip_json_{{node.typeName.name | lower}}{% if not loop.first %}_{{loop.index - 1}}{% endif %}():
+    """Test that load -> save -> load produces equivalent data."""
+    json_data = '''
+    {% for line in sample.json -%}
+    {{ line }}
+    {% endfor -%}
+    '''
+    original_data = json.loads(json_data, strict=False)
+    instance = {{node.typeName.name}}.load(original_data)
+    saved_data = instance.save()
+    reloaded = {{node.typeName.name}}.load(saved_data)
+    assert reloaded is not None
+    {%- for validation in sample.validation %}
+    {%- if validation.value == "True" or validation.value == "False" %}
+    assert {% if validation.value == "False" %}not {% endif %}reloaded.{{ validation.key }}
+    {%- else %}
+    assert reloaded.{{ validation.key }} == {{ validation.delimeter }}{{ validation.value }}{{ validation.delimeter }}
+    {%- endif %}
+    {%- endfor %}
+
+def test_to_json_{{node.typeName.name | lower}}{% if not loop.first %}_{{loop.index - 1}}{% endif %}():
+    """Test that to_json produces valid JSON."""
+    json_data = '''
+    {% for line in sample.json -%}
+    {{ line }}
+    {% endfor -%}
+    '''
+    data = json.loads(json_data, strict=False)
+    instance = {{node.typeName.name}}.load(data)
+    json_output = instance.to_json()
+    assert json_output is not None
+    parsed = json.loads(json_output)
+    assert isinstance(parsed, dict)
+
+def test_to_yaml_{{node.typeName.name | lower}}{% if not loop.first %}_{{loop.index - 1}}{% endif %}():
+    """Test that to_yaml produces valid YAML."""
+    json_data = '''
+    {% for line in sample.json -%}
+    {{ line }}
+    {% endfor -%}
+    '''
+    data = json.loads(json_data, strict=False)
+    instance = {{node.typeName.name}}.load(data)
+    yaml_output = instance.to_yaml()
+    assert yaml_output is not None
+    parsed = yaml.safe_load(yaml_output)
+    assert isinstance(parsed, dict)
 {% endfor %}
 {% if alternates.length > 0 %}
 {% for alt in alternates -%}

@@ -6,9 +6,9 @@
 
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
-from ._context import LoadContext
+from ._context import LoadContext, SaveContext
 from ._EnvironmentVariable import EnvironmentVariable
 from ._Model import Model
 from ._PropertySchema import PropertySchema
@@ -17,14 +17,13 @@ from ._Template import Template
 from ._Tool import Tool
 
 
-
 @dataclass
 class AgentDefinition(ABC):
     """The following is a specification for defining AI agents with structured metadata, inputs, outputs, tools, and templates.
     It provides a way to create reusable and composable AI agents that can be executed with specific configurations.
     The specification includes metadata about the agent, model configuration, input parameters, expected outputs,
     available tools, and template configurations for prompt rendering.
-    
+
     Attributes
     ----------
     kind : str
@@ -42,6 +41,8 @@ class AgentDefinition(ABC):
     outputSchema : Optional[PropertySchema]
         Expected output format and structure from the agent
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="")
     name: str = field(default="")
@@ -61,16 +62,15 @@ class AgentDefinition(ABC):
             AgentDefinition: The loaded AgentDefinition instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for AgentDefinition: {data}")
 
         # load polymorphic AgentDefinition instance
         instance = AgentDefinition.load_kind(data, context)
-
 
         if data is not None and "kind" in data:
             instance.kind = data["kind"]
@@ -90,8 +90,6 @@ class AgentDefinition(ABC):
             instance = context.process_output(instance)
         return instance
 
-
-
     @staticmethod
     def load_kind(data: dict, context: Optional[LoadContext]) -> "AgentDefinition":
         # load polymorphic AgentDefinition instance
@@ -105,11 +103,70 @@ class AgentDefinition(ABC):
                 return ContainerAgent.load(data, context)
 
             else:
-                raise ValueError(f"Unknown AgentDefinition discriminator value: {discriminator_value}")
+                raise ValueError(
+                    f"Unknown AgentDefinition discriminator value: {discriminator_value}"
+                )
         else:
 
             raise ValueError("Missing AgentDefinition discriminator property: 'kind'")
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the AgentDefinition instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        result: dict[str, Any] = {}
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.name is not None:
+            result["name"] = obj.name
+        if obj.displayName is not None:
+            result["displayName"] = obj.displayName
+        if obj.description is not None:
+            result["description"] = obj.description
+        if obj.metadata is not None:
+            result["metadata"] = obj.metadata
+        if obj.inputSchema is not None:
+            result["inputSchema"] = obj.inputSchema.save(context)
+        if obj.outputSchema is not None:
+            result["outputSchema"] = obj.outputSchema.save(context)
+
+        if context is not None:
+            result = context.process_dict(result)
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the AgentDefinition instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the AgentDefinition instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
@@ -117,7 +174,7 @@ class PromptAgent(AgentDefinition):
     """Prompt based agent definition. Used to create agents that can be executed directly.
     These agents can leverage tools, input parameters, and templates to generate responses.
     They are designed to be straightforward and easy to use for various applications.
-    
+
     Attributes
     ----------
     kind : str
@@ -133,6 +190,8 @@ class PromptAgent(AgentDefinition):
     additionalInstructions : Optional[str]
         Additional instructions or context for the agent, can be used to provide extra guidance (can use this for a pure yaml declaration)
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="prompt")
     model: Model = field(default_factory=Model)
@@ -151,10 +210,10 @@ class PromptAgent(AgentDefinition):
             PromptAgent: The loaded PromptAgent instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for PromptAgent: {data}")
 
@@ -177,17 +236,109 @@ class PromptAgent(AgentDefinition):
             instance = context.process_output(instance)
         return instance
 
-
     @staticmethod
     def load_tools(data: dict | list, context: Optional[LoadContext]) -> list[Tool]:
         if isinstance(data, dict):
             # convert simple named tools to list of Tool
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "kind": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "kind": v})
+            data = result
         return [Tool.load(item, context) for item in data]
 
+    @staticmethod
+    def save_tools(
+        items: list[Tool], context: Optional[SaveContext]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
+
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, "_shorthand_property"):
+                    shorthand_prop = item._shorthand_property
+                    if (
+                        shorthand_prop
+                        and len(item_data) == 1
+                        and shorthand_prop in item_data
+                    ):
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
+
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the PromptAgent instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.model is not None:
+            result["model"] = obj.model.save(context)
+        if obj.tools is not None:
+            result["tools"] = PromptAgent.save_tools(obj.tools, context)
+        if obj.template is not None:
+            result["template"] = obj.template.save(context)
+        if obj.instructions is not None:
+            result["instructions"] = obj.instructions
+        if obj.additionalInstructions is not None:
+            result["additionalInstructions"] = obj.additionalInstructions
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the PromptAgent instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the PromptAgent instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
@@ -195,15 +346,15 @@ class Workflow(AgentDefinition):
     """A workflow agent that can orchestrate multiple steps and actions.
     This agent type is designed to handle complex workflows that may involve
     multiple tools, models, and decision points.
-    
+
     The workflow agent can be configured with a series of steps that define
     the flow of execution, including conditional logic and parallel processing.
     This allows for the creation of sophisticated AI-driven processes that can
     adapt to various scenarios and requirements.
-    
+
     Note: The detailed structure of the workflow steps and actions is not defined here
     and would need to be implemented based on specific use cases and requirements.
-    
+
     Attributes
     ----------
     kind : str
@@ -211,6 +362,8 @@ class Workflow(AgentDefinition):
     trigger : Optional[dict[str, Any]]
         The steps that make up the workflow
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="workflow")
     trigger: Optional[dict[str, Any]] = None
@@ -225,10 +378,10 @@ class Workflow(AgentDefinition):
             Workflow: The loaded Workflow instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for Workflow: {data}")
 
@@ -243,7 +396,52 @@ class Workflow(AgentDefinition):
             instance = context.process_output(instance)
         return instance
 
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the Workflow instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
 
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.trigger is not None:
+            result["trigger"] = obj.trigger
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the Workflow instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the Workflow instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
 
 
 @dataclass
@@ -251,7 +449,7 @@ class ContainerAgent(AgentDefinition):
     """This represents a container based agent hosted by the provider/publisher.
     The intent is to represent a container application that the user wants to run
     in a hosted environment that the provider manages.
-    
+
     Attributes
     ----------
     kind : str
@@ -261,6 +459,8 @@ class ContainerAgent(AgentDefinition):
     environmentVariables : list[EnvironmentVariable]
         Environment variables to set in the container
     """
+
+    _shorthand_property: ClassVar[Optional[str]] = None
 
     kind: str = field(default="hosted")
     protocols: list[ProtocolVersionRecord] = field(default_factory=list)
@@ -276,10 +476,10 @@ class ContainerAgent(AgentDefinition):
             ContainerAgent: The loaded ContainerAgent instance.
 
         """
-        
+
         if context is not None:
             data = context.process_input(data)
-        
+
         if not isinstance(data, dict):
             raise ValueError(f"Invalid data for ContainerAgent: {data}")
 
@@ -289,32 +489,166 @@ class ContainerAgent(AgentDefinition):
         if data is not None and "kind" in data:
             instance.kind = data["kind"]
         if data is not None and "protocols" in data:
-            instance.protocols = ContainerAgent.load_protocols(data["protocols"], context)
+            instance.protocols = ContainerAgent.load_protocols(
+                data["protocols"], context
+            )
         if data is not None and "environmentVariables" in data:
-            instance.environmentVariables = ContainerAgent.load_environmentVariables(data["environmentVariables"], context)
+            instance.environmentVariables = ContainerAgent.load_environmentVariables(
+                data["environmentVariables"], context
+            )
         if context is not None:
             instance = context.process_output(instance)
         return instance
 
-
     @staticmethod
-    def load_protocols(data: dict | list, context: Optional[LoadContext]) -> list[ProtocolVersionRecord]:
+    def load_protocols(
+        data: dict | list, context: Optional[LoadContext]
+    ) -> list[ProtocolVersionRecord]:
         if isinstance(data, dict):
             # convert simple named protocols to list of ProtocolVersionRecord
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "protocol": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "protocol": v})
+            data = result
         return [ProtocolVersionRecord.load(item, context) for item in data]
 
     @staticmethod
-    def load_environmentVariables(data: dict | list, context: Optional[LoadContext]) -> list[EnvironmentVariable]:
+    def save_protocols(
+        items: list[ProtocolVersionRecord], context: Optional[SaveContext]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
+
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, "_shorthand_property"):
+                    shorthand_prop = item._shorthand_property
+                    if (
+                        shorthand_prop
+                        and len(item_data) == 1
+                        and shorthand_prop in item_data
+                    ):
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
+
+    @staticmethod
+    def load_environmentVariables(
+        data: dict | list, context: Optional[LoadContext]
+    ) -> list[EnvironmentVariable]:
         if isinstance(data, dict):
             # convert simple named environmentVariables to list of EnvironmentVariable
-            if(len(data.keys()) == 1):
-                data = [ {"name": k, "value": v} for k, v in data.items() ]
-            else:
-                data = [ {"name": k, **v} for k, v in data.items() ]
+            result = []
+            for k, v in data.items():
+                if isinstance(v, dict):
+                    # value is an object, spread its properties
+                    result.append({"name": k, **v})
+                else:
+                    # value is a scalar, use it as the primary property
+                    result.append({"name": k, "value": v})
+            data = result
         return [EnvironmentVariable.load(item, context) for item in data]
 
+    @staticmethod
+    def save_environmentVariables(
+        items: list[EnvironmentVariable], context: Optional[SaveContext]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
+        if context is None:
+            context = SaveContext()
 
+        if context.collection_format == "array":
+            return [item.save(context) for item in items]
+
+        # Object format: use name as key
+        result: dict[str, Any] = {}
+        for item in items:
+            item_data = item.save(context)
+            name = item_data.pop("name", None)
+            if name:
+                # Check if we can use shorthand (only primary property set)
+                if context.use_shorthand and hasattr(item, "_shorthand_property"):
+                    shorthand_prop = item._shorthand_property
+                    if (
+                        shorthand_prop
+                        and len(item_data) == 1
+                        and shorthand_prop in item_data
+                    ):
+                        result[name] = item_data[shorthand_prop]
+                        continue
+                result[name] = item_data
+            else:
+                # No name, fall back to array format for this item
+                if "_unnamed" not in result:
+                    result["_unnamed"] = []
+                result["_unnamed"].append(item_data)
+        return result
+
+    def save(self, context: Optional[SaveContext] = None) -> dict[str, Any]:
+        """Save the ContainerAgent instance to a dictionary.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            dict[str, Any]: The dictionary representation of this instance.
+
+        """
+        obj = self
+        if context is not None:
+            obj = context.process_object(obj)
+
+        # Start with parent class properties
+        result = super().save(context)
+
+        if obj.kind is not None:
+            result["kind"] = obj.kind
+        if obj.protocols is not None:
+            result["protocols"] = ContainerAgent.save_protocols(obj.protocols, context)
+        if obj.environmentVariables is not None:
+            result["environmentVariables"] = ContainerAgent.save_environmentVariables(
+                obj.environmentVariables, context
+            )
+
+        return result
+
+    def to_yaml(self, context: Optional[SaveContext] = None) -> str:
+        """Convert the ContainerAgent instance to a YAML string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+        Returns:
+            str: The YAML string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_yaml(self.save(context))
+
+    def to_json(self, context: Optional[SaveContext] = None, indent: int = 2) -> str:
+        """Convert the ContainerAgent instance to a JSON string.
+        Args:
+            context (Optional[SaveContext]): Optional context with pre/post processing callbacks.
+            indent (int): Number of spaces for indentation. Defaults to 2.
+        Returns:
+            str: The JSON string representation of this instance.
+
+        """
+        if context is None:
+            context = SaveContext()
+        return context.to_json(self.save(context), indent)
